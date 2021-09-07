@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import './shim.js';
 import crypto from 'crypto';
+import sodium from 'react-native-libsodium';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -30,7 +31,16 @@ const App = () => {
       <Button
         title={'Crypto test'}
         onPress={() => {
-          setMessage(crypto.randomBytes(32).toString('base64'));
+          const randomBytes = crypto.randomBytes(32).toString('base64');
+          setMessage(`Random bytes:\n${randomBytes}`);
+        }}
+      />
+
+      <Button
+        title={'Sodium test'}
+        onPress={() => {
+          const key = sodium.sodium_malloc(sodium.crypto_kdf_KEYBYTES);
+          setMessage(`Key:\n${JSON.stringify(key)}`);
         }}
       />
 
