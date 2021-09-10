@@ -1,5 +1,9 @@
-import { NativeModules } from 'react-native';
+/**
+ * @format
+ */
 
-const { Slashtags } = NativeModules;
+import {AppRegistry} from 'react-native';
+import App from './App';
+import {name as appName} from './app.json';
 
-export default Slashtags;
+AppRegistry.registerComponent(appName, () => App);
