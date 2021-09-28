@@ -6,6 +6,7 @@
   "author": "synonymdev",
   "license": "",
   "dependencies": {
-    "@synonymdev/slashtags-url": "^0.1.1"
+    "@synonymdev/slashtags-url": "^0.1.1",
+    "noise-curve-tiny-secp": "latest"
   }
 }
