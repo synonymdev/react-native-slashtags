@@ -20,11 +20,9 @@ import {
 } from 'react-native';
 import crypto from 'crypto';
 import sodium from 'react-native-libsodium';
-// import secp256k1 from 'react-native-secp256k1';
-// import secp256k1 from 'tiny-secp256k1';
 import {secp256k1} from 'noise-curve-tiny-secp';
 
-import {createAuth} from '@synonymdev/slashtags-auth';
+import Wallet from './Wallet';
 
 // const {RNSecp256k1, RNOS} = NativeModules;
 
@@ -69,18 +67,7 @@ const App = () => {
         }}
       />
 
-      <Button
-        title={'Slashtags auth test'}
-        onPress={async () => {
-          const pair = secp256k1.generateKeyPair();
-
-          const auth = createAuth(pair, {})
-
-          const message = auth.newChallenge(10)
-
-          setMessage(`${JSON.stringify(message)}`);
-        }}
-      />
+      <Wallet />
 
       <Text>{message}</Text>
     </SafeAreaView>

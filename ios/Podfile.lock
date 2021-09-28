@@ -511,7 +511,7 @@ SPEC CHECKSUMS:
   React-jsi: 12913c841713a15f64eabf5c9ad98592c0ec5940
   React-jsiexecutor: 43f2542aed3c26e42175b339f8d37fe3dd683765
   React-jsinspector: 41e58e5b8e3e0bf061fdf725b03f2144014a8fb0
-  react-native-libsodium: 605739edeee166bfa4c57c51609a2096973c85f3
+  react-native-libsodium: f4eba037c4ddf73f86b08075452cacb957256147
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
   React-perflogger: fd28ee1f2b5b150b00043f0301d96bd417fdc339
   React-RCTActionSheet: 7f3fa0855c346aa5d7c60f9ced16e067db6d29fa
@@ -531,4 +531,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 012f9dcd41d0d2d06ef62ad1050b67310fd848bb
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2
