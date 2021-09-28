@@ -22,7 +22,7 @@ import crypto from 'crypto';
 import sodium from 'react-native-libsodium';
 import {secp256k1} from 'noise-curve-tiny-secp';
 
-import Wallet from './Wallet';
+import SlashtagsServer from './SlashtagsServer';
 
 // const {RNSecp256k1, RNOS} = NativeModules;
 
@@ -67,7 +67,7 @@ const App = () => {
         }}
       />
 
-      <Wallet />
+      <SlashtagsServer />
 
       <Text>{message}</Text>
     </SafeAreaView>
