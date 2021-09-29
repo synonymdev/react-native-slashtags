@@ -8,7 +8,7 @@
  * @format
  */
 
-import './shim.js';
+import '../shim.js';
 import React, {useState} from 'react';
 import {
   Button,
@@ -20,6 +20,8 @@ import {
 } from 'react-native';
 
 import SlashtagsServer from './SlashtagsServer';
+import SlashtagsWeb from './SlashtagsWeb';
+import {WebView} from 'react-native-webview';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -29,7 +31,8 @@ const App = () => {
     <SafeAreaView>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 
-      <SlashtagsServer />
+      {/*<SlashtagsServer />*/}
+      <SlashtagsWeb />
 
       <Text>{message}</Text>
     </SafeAreaView>
