@@ -3,7 +3,7 @@
 
 var rn_bridge = require('rn-bridge');
 var SlashtagsURL = require('@synonymdev/slashtags-url');
-// var createAuth = require('@synonymdev/slashtags-auth').createAuth;
+// var createAuth = require('@synonymdev/slashtags-auth');
 var curve = require('noise-curve-tiny-secp').secp256k1;
 
 var initiator;
@@ -22,7 +22,7 @@ rn_bridge.channel.on('decode-url', actionURL => {
 rn_bridge.channel.on('key-pair', seed => {
   const username = seed;
   const userKeyPair = curve.generateSeedKeyPair(seed);
-  //
+
   // const {initiator: init} = createAuth(userKeyPair, {
   //   metadata: {preferred_name: username},
   // });

@@ -7,15 +7,7 @@ import nodejs from 'nodejs-mobile-react-native';
 //   "noise-curve-secp256k1": "git+ssh://git@github.com/synonymdev/noise-curve-tiny-secp256k1.git"
 
 import React, {useState, useEffect} from 'react';
-import {
-  Button,
-  SafeAreaView,
-  StatusBar,
-  Text,
-  TextInput,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {Button, Text, TextInput, View} from 'react-native';
 import {
   Initiator,
   KeyPair,
@@ -43,6 +35,8 @@ const Wallet = () => {
   const [authPayload, setAuthPayload] = useState<object>();
 
   useEffect(() => {
+    return;
+
     if (severStarted) {
       return;
     }
