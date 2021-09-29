@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c1ddcb45-313a-4a88-8ac9-d5700e831a37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/mobile/src/SlashtagsWeb.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/src/App.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile/RN.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/src/RN.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile/SlashtagsServer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/src/SlashtagsServer.tsx" afterDir="false" />
@@ -59,7 +58,7 @@
       <workItem from="1631037512886" duration="20378000" />
       <workItem from="1631610436995" duration="16846000" />
       <workItem from="1632391344401" duration="239000" />
-      <workItem from="1632406601548" duration="24641000" />
+      <workItem from="1632406601548" duration="25032000" />
     </task>
     <servers />
   </component>

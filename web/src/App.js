@@ -24,35 +24,39 @@ function App() {
 
           const { initiator } = createAuth(keyPair, { metadata });
 
-          result = Object.keys(initiator);
+          const { attestation, verifyResponder } = initiator.respond(
+            bint.fromString(authPayload.remotePK, 'hex'),
+            bint.fromString(authPayload.challenge, 'hex'),
+          );
 
-          // return;
-          //
-          // const { attestation, verifyResponder } = initiator.signChallenge(
-          //   bint.fromString(authPayload.remotePK, 'hex'),
-          //   bint.fromString(authPayload.challenge, 'hex'),
-          // );
-          //
-          // const url = new URL(authPayload.cbURL);
-          // url.searchParams.set(
-          //   'attestation',
-          //   Buffer.from(attestation).toString('hex'),
-          // );
-          //
-          // const res = await fetch(url.toString());
-          // const { responderAttestation } = await res.json();
-          //
-          // const { responderPK, metadata: resMetadata } = verifyResponder(
-          //   Buffer.from(responderAttestation, 'hex'),
-          // );
-          //
-          // result = {
-          //   verified: true,
-          //   metadata: resMetadata,
-          //   responderPK: Buffer.from(responderPK).toString('hex'),
-          // };
+          const url = new URL(authPayload.cbURL);
+          url.searchParams.set(
+            'attestation',
+            Buffer.from(attestation).toString('hex'),
+          );
 
-          // alert(JSON.stringify(params.keyPair.publicKey.data.length));
+          alert(1);
+
+          const res = await fetch(url.toString());
+          const { responderAttestation } = await res.json();
+
+          alert(2);
+
+          const { responderPK, metadata: resMetadata } = verifyResponder(
+            Buffer.from(responderAttestation, 'hex'),
+          );
+
+          alert(3);
+
+
+          result = {
+            verified: true,
+            metadata: resMetadata,
+            responderPK: Buffer.from(responderPK).toString('hex'),
+          };
+
+
+          alert(JSON.stringify(result));
         }
       }
     } catch (e) {

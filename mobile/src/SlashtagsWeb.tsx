@@ -11,7 +11,7 @@ import {SlashtagsURL} from '@synonymdev/slashtags-url/types/interfaces';
 
 const SlashtagsWeb = () => {
   const [actionURL, setActionURL] = useState(
-    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7InJlbW90ZVBLIjoiMDNmYzg4OGFlOTMxNDExZmY5ZmMxMjE3ZmU2NzYxMmVmNjE4NWViMTk5ZmIwY2JkMTlhNWVmMDVhMmYwYWFiZDNiIiwiY2hhbGxlbmdlIjoiNmUwNDdmMTgzZGRkMjBhMzQ2YjkwMDQwYTdmMzJiMWViMzQyZGY0YzUxYmM0NDhjMjY3NTEwMWY5MDBlYWI5NSIsImNiVVJMIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL2Fuc3dlci8ifQ',
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7InJlbW90ZVBLIjoiMDNmYzg4OGFlOTMxNDExZmY5ZmMxMjE3ZmU2NzYxMmVmNjE4NWViMTk5ZmIwY2JkMTlhNWVmMDVhMmYwYWFiZDNiIiwiY2hhbGxlbmdlIjoiMTRhYWI0YTZmNTQ3NWJhY2RlY2M2OTY3YmU5YTlkOGJmMWIwYzQyNjM4YTI0OTBmMmQ5ZTlmZTQzNzNmNzM1ZCIsImNiVVJMIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL2Fuc3dlci8ifQ',
   );
 
   const [severStarted, setServerStarted] = useState(false);
