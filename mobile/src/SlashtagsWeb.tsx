@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {Button, Text, TextInput, View} from 'react-native';
+import {Button, Text, TextInput, View, StyleSheet, Alert} from 'react-native';
 import {
   Initiator,
   KeyPair,
@@ -8,19 +8,28 @@ import {
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
 
 import {SlashtagsURL} from '@synonymdev/slashtags-url/types/interfaces';
+import Scanner from './Scanner';
 
 const SlashtagsWeb = () => {
-  const [actionURL, setActionURL] = useState(
-    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7InJlbW90ZVBLIjoiMDNmYzg4OGFlOTMxNDExZmY5ZmMxMjE3ZmU2NzYxMmVmNjE4NWViMTk5ZmIwY2JkMTlhNWVmMDVhMmYwYWFiZDNiIiwiY2hhbGxlbmdlIjoiMTRhYWI0YTZmNTQ3NWJhY2RlY2M2OTY3YmU5YTlkOGJmMWIwYzQyNjM4YTI0OTBmMmQ5ZTlmZTQzNzNmNzM1ZCIsImNiVVJMIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL2Fuc3dlci8ifQ',
-  );
+  const [actionURL, setActionURL] = useState('');
 
   const [severStarted, setServerStarted] = useState(false);
   const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('Alice');
   const [decodedUrl, setDecodedUrl] = useState<SlashtagsURL>();
   const [keyPair, setKeyPair] = useState<KeyPair>();
   const [authPayload, setAuthPayload] = useState<object>();
+  const [account, setAccount] = useState<object>();
 
   let webViewRef = useRef(null);
+  const callWebAction = (method: string, params: object) => {
+    const javascript = `
+            webAction('${method}', '${JSON.stringify(params)}');
+            true;
+          `;
+    // @ts-ignore
+    webViewRef.injectJavaScript(javascript);
+  };
 
   useEffect(() => {
     // Handle incoming action urls
@@ -34,7 +43,37 @@ const SlashtagsWeb = () => {
 
         switch (actionID) {
           case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
-            setAuthPayload(payload);
+            // setAuthPayload(payload);
+
+            Alert.alert('Sign in', `Challenge: ${payload.challenge}`, [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+              },
+              {
+                text: 'Sign in',
+                onPress: () => {
+                  callWebAction('auth', {
+                    seed: username,
+                    metadata: {preferred_name: username},
+                    authPayload: payload,
+                  });
+
+                  setDecodedUrl(undefined);
+                  setAuthPayload(undefined);
+
+                  // alert(
+                  //   JSON.stringify({
+                  //     seed: username,
+                  //     metadata: {preferred_name: username},
+                  //     authPayload: payload,
+                  //   }),
+                  // );
+                },
+              },
+            ]);
+
             break;
 
           default:
@@ -46,16 +85,23 @@ const SlashtagsWeb = () => {
         console.error('Invalid actionURL url');
       }
     })();
-  }, [decodedUrl, actionURL]);
+  }, [decodedUrl, actionURL, callWebAction]);
 
-  const callWebAction = (method: string, params: object) => {
-    const javascript = `
-            webAction('${method}', '${JSON.stringify(params)}');
-            true;
-          `;
-    // @ts-ignore
-    webViewRef.injectJavaScript(javascript);
-  };
+  useEffect(() => {
+    if (!severStarted) {
+      return;
+    }
+
+    callWebAction('create-key-pair', {seed: username});
+  }, [severStarted, username]);
+
+  useEffect(() => {
+    if (!severStarted || !actionURL || actionURL.indexOf('slashtags:') < 0) {
+      return;
+    }
+
+    callWebAction('decode-url', {actionURL});
+  }, [severStarted, actionURL]);
 
   const handleWebActionResponse = (event: WebViewMessageEvent) => {
     const {method, result, error} = JSON.parse(event.nativeEvent.data);
@@ -75,16 +121,16 @@ const SlashtagsWeb = () => {
         break;
       }
       case 'auth': {
-        setMessage(result);
+        setAccount(result);
+        setActionURL('');
+        setAuthPayload(undefined);
         break;
       }
       default: {
-        alert(`Unknown method response (${method})`);
+        console.error(`Unknown method response (${method})`);
       }
     }
   };
-
-  const username = 'My username';
 
   return (
     <View>
@@ -93,56 +139,113 @@ const SlashtagsWeb = () => {
           // @ts-ignore
           webViewRef = r;
         }}
-        source={{uri: 'http://localhost:3001/'}}
-        onLoad={() => setMessage('Web app loaded')}
+        source={{uri: 'http://192.168.1.139:3001/'}}
+        onLoad={() => setServerStarted(true)}
         onMessage={handleWebActionResponse}
       />
-      <Text>Username: {username}</Text>
+
+      <View style={{width: '100%', height: 250}}>
+        <Scanner onRead={setActionURL} />
+      </View>
+
+      <Text style={styles.text}>Username</Text>
 
       <TextInput
-        style={{height: 20, width: '100%', backgroundColor: 'green'}}
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+      />
+
+      <Text style={styles.text}>URL</Text>
+
+      <TextInput
+        style={styles.input}
         value={actionURL}
         onChangeText={setActionURL}
       />
-      <Button
-        title="Decode URL"
-        onPress={() => {
-          callWebAction('decode-url', {actionURL});
-        }}
-      />
-      <Button
-        title="Set user"
-        onPress={() => {
-          callWebAction('create-key-pair', {seed: username});
-        }}
-      />
-      <Button
-        title="Auth"
-        onPress={() => {
-          if (!authPayload) {
-            return alert('Set authPayload');
-          }
+      {/*<Button*/}
+      {/*  title="Decode URL"*/}
+      {/*  onPress={() => {*/}
+      {/*    callWebAction('decode-url', {actionURL});*/}
+      {/*  }}*/}
+      {/*/>*/}
 
-          callWebAction('auth', {
-            seed: username,
-            metadata: {preferred_name: username},
-            authPayload,
-          });
-        }}
-      />
-
-      <Text>
-        Web message: {JSON.stringify(message)}
+      <Text style={styles.text}>
+        KEY PAIR: {JSON.stringify(keyPair)}
         {'\n\n'}
       </Text>
-      {/*<Text>URL: {JSON.stringify(decodedUrl)}</Text>*/}
-      <Text>
-        AUTH: {JSON.stringify(authPayload)}
-        {'\n\n'}
-      </Text>
-      <Text>KEY PAIR: {JSON.stringify(keyPair)}</Text>
+
+      {authPayload ? (
+        <>
+          <Text style={styles.text}>
+            AUTH: {JSON.stringify(authPayload)}
+            {'\n'}
+          </Text>
+          {/*<Button*/}
+          {/*  title="Auth"*/}
+          {/*  onPress={() => {*/}
+          {/*    if (!authPayload) {*/}
+          {/*      return alert('Set authPayload');*/}
+          {/*    }*/}
+
+          {/*    callWebAction('auth', {*/}
+          {/*      seed: username,*/}
+          {/*      metadata: {preferred_name: username},*/}
+          {/*      authPayload,*/}
+          {/*    });*/}
+          {/*  }}*/}
+          {/*/>*/}
+        </>
+      ) : null}
+
+      {account ? (
+        <View style={styles.account}>
+          <Text style={styles.text}>
+            Verified: {account.verified ? '✅' : '❌'}
+            {'\n'}
+          </Text>
+
+          <Text style={styles.text}>
+            Pubkey:{'\n'}
+            {account.responderPK}
+            {'\n'}
+          </Text>
+
+          <Text style={styles.text}>
+            Metadata:{'\n'}
+            {JSON.stringify(account.metadata)}
+            {'\n'}
+          </Text>
+
+          {/*<Text style={styles.text}>*/}
+          {/*  {'\n'}*/}
+          {/*  {'\n'}*/}
+          {/*  Account:*/}
+          {/*  {JSON.stringify(account)}*/}
+          {/*  {'\n\n'}*/}
+          {/*</Text>*/}
+        </View>
+      ) : null}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    color: 'green',
+  },
+  input: {
+    backgroundColor: 'green',
+    marginBottom: 10,
+  },
+  account: {
+    borderStyle: 'solid',
+    borderColor: 'green',
+    borderWidth: 1,
+    borderRadius: 10,
+    margin: 10,
+    padding: 10,
+  },
+});
 
 export default SlashtagsWeb;
