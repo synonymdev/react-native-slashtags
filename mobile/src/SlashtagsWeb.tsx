@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Button, Text, TextInput, View, StyleSheet, Alert} from 'react-native';
 import {
   Initiator,
@@ -6,6 +6,7 @@ import {
   Responder,
 } from '@synonymdev/slashtags-auth/types/interfaces';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import {SlashtagsURL} from '@synonymdev/slashtags-url/types/interfaces';
 import Scanner from './Scanner';
@@ -22,14 +23,17 @@ const SlashtagsWeb = () => {
   const [account, setAccount] = useState<object>();
 
   let webViewRef = useRef(null);
-  const callWebAction = (method: string, params: object) => {
+  const callWebAction = useCallback((method: string, params: object) => {
     const javascript = `
             webAction('${method}', '${JSON.stringify(params)}');
             true;
           `;
     // @ts-ignore
     webViewRef.injectJavaScript(javascript);
-  };
+  }, []);
+
+  //TODO should be bundled and served locally
+  const webAppUrl = 'http://localhost:3001/'; //'https://st-876349234987329479347.surge.sh/';
 
   useEffect(() => {
     // Handle incoming action urls
@@ -42,9 +46,8 @@ const SlashtagsWeb = () => {
         const {actionID, payload} = decodedUrl!;
 
         switch (actionID) {
-          case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
+          case 'b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z':
             // setAuthPayload(payload);
-
             Alert.alert('Sign in', `Challenge: ${payload.challenge}`, [
               {
                 text: 'Cancel',
@@ -85,7 +88,7 @@ const SlashtagsWeb = () => {
         console.error('Invalid actionURL url');
       }
     })();
-  }, [decodedUrl, actionURL, callWebAction]);
+  }, [username, decodedUrl, actionURL, callWebAction]);
 
   useEffect(() => {
     if (!severStarted) {
@@ -107,7 +110,7 @@ const SlashtagsWeb = () => {
     const {method, result, error} = JSON.parse(event.nativeEvent.data);
 
     if (error) {
-      console.error(error);
+      console.error(`Web response: ${error}`);
       return;
     }
 
@@ -139,7 +142,7 @@ const SlashtagsWeb = () => {
           // @ts-ignore
           webViewRef = r;
         }}
-        source={{uri: 'http://192.168.1.139:3001/'}}
+        source={{uri: webAppUrl}}
         onLoad={() => setServerStarted(true)}
         onMessage={handleWebActionResponse}
       />
@@ -147,6 +150,16 @@ const SlashtagsWeb = () => {
       <View style={{width: '100%', height: 250}}>
         <Scanner onRead={setActionURL} />
       </View>
+
+      <Button
+        title={'Paste from clipboard'}
+        onPress={async () => {
+          const text = await Clipboard.getString();
+          if (text) {
+            setActionURL(text);
+          }
+        }}
+      />
 
       <Text style={styles.text}>Username</Text>
 
