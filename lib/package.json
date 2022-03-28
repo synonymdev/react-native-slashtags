@@ -1,46 +1,62 @@
 {
-  "name": "react-native-slashtags",
-  "version": "1.0.2",
-  "description": "React native wrapper for slashtags",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "name": "@synonymdev/react-native-slashtags",
+  "title": "React Native Slashtags",
+  "version": "0.0.34",
+  "description": "React Native wrapper for Slashtags",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "keywords": [
+    "javascript",
+    "slashtags"
+  ],
   "scripts": {
-    "test": "jest --config jestconfig.json",
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "build": "rm -rf dist && mkdir dist/ && tsc -p ./src",
+    "watch": "yarn run build -- -w",
+    "lint": "yarn run lint:ts",
+    "lint:ts": "eslint . --ext .ts,.tsx --fix",
+    "prepublish": "yarn lint && yarn run build && npm --no-git-tag-version version patch"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/synonymdev/react-native-slashtags.git"
+    "url": "git+https://github.com/synonymdev/react-native-slashtags.git",
+    "baseUrl": "https://github.com/synonymdev/react-native-slashtags"
   },
-  "keywords": [
-    "Hello",
-    "Greeter"
-  ],
-  "author": "C-J",
-  "license": "ISC",
+  "author": "synonymdev",
+  "license": "MIT",
+  "licenseFilename": "LICENSE",
+  "peerDependencies": {
+    "react": "17.0.2",
+    "react-native": "0.67.4",
+    "react-native-webview": "^11.17.2"
+  },
+  "devDependencies": {
+    "@react-native-community/eslint-config": "^2.0.0",
+    "@types/react-native": "0.62.13",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-config-standard-with-typescript": "18.0.2",
+    "eslint-plugin-import": "2.21.2",
+    "eslint-plugin-no-null": "1.0.2",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "3.1.4",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-standard": "4.0.1",
+    "prettier": "^2.2.1",
+    "react-native-webview": "^11.17.2",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {},
   "bugs": {
     "url": "https://github.com/synonymdev/react-native-slashtags/issues"
   },
   "homepage": "https://github.com/synonymdev/react-native-slashtags#readme",
-  "devDependencies": {
-    "@types/jest": "^22.2.3",
-    "codecov": "^3.1.0",
-    "jest": "^23.6.0",
-    "prettier": "^1.13.2",
-    "ts-jest": "^22.4.6",
-    "tsc": "^2.0.4",
-    "tslint": "^5.10.0",
-    "tslint-config-prettier": "^1.13.0",
-    "typescript": "^2.8.3"
-  },
-  "files": [
-    "dist/**/*"
-  ]
+  "directories": {
+    "example": "example"
+  }
 }
