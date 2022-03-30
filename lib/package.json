@@ -51,7 +51,8 @@
     "react-native-webview": "^11.17.2",
     "typescript": "^4.2.4"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "bugs": {
     "url": "https://github.com/synonymdev/react-native-slashtags/issues"
   },
