@@ -1,12 +1,9 @@
 import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 import { Core } from '@synonymdev/slashtags-core';
-import { ACT1_InitialResponseResult, Actions } from '@synonymdev/slashtags-actions';
+import { Actions } from '@synonymdev/slashtags-actions';
 
-import {bytesToHexString, hexStringToBytes} from './helpers';
-import {Buffer} from 'buffer';
+import {bytesKeyPairToStringKeyPair, hexStringToBytes, stringKeyPairToBytesKeyPair} from './helpers';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
-
-import crypto from "crypto-js";
 
 declare global {
     interface Window {
@@ -18,14 +15,6 @@ declare global {
 declare global {
     var IDBMutableFile: any;
 }
-
-const testWebProfile = {
-    '@id': null,
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Test web view profile',
-    image: 'https://www.example.com/logo.png',
-};
 
 const relays = ['ws://localhost:8888'];
 
@@ -52,35 +41,21 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 onResult(didKeyFromPubKey(hexStringToBytes(params.pubKey)));
                 break;
             }
+            case 'generateSeedKeyPair': {
+                onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params.seed)));
+                break;
+            }
             case 'auth': {
-                const {url} = params;
+                const {url, profile} = params;
+                const keyPair = stringKeyPairToBytesKeyPair(params.keyPair);
+
                 const node = await Core({ relays });
                 const actions = Actions(node);
 
-                //Keypair must be a buffer
-                const keyPair = {
-                    publicKey: Buffer.from('0xc2cdf0a8b0a83b35ace53f097b5e6e6a0a1f2d40535eff1cf434f52a43d59d8f', 'hex'),
-                    secretKey: Buffer.from('0x6fcc37ea5e9e09fec6c83e5fbd7a745e3eee81d16ebd861c9e66f55518c19798', 'hex')
-                }
-
-                // const keyPair = curve.generateSeedKeyPair("TODO");
-
-                const id = didKeyFromPubKey(keyPair.publicKey);
-
                 const persona = {
-                    profile: {
-                        '@context': 'https://schema.org',
-                        '@type': 'Person',
-                        '@id': id,
-                    },
+                    profile,
                     keyPair,
                 };
-
-                let retrievedBackup: Uint8Array | undefined = undefined;
-
-                console.log("actions.handle");
-                console.log(url);
-                console.log(keyPair);
 
                 await actions.handle(
                     url,
@@ -90,26 +65,18 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                                 serverProfile, // Responder's profile
                                 additionalItems, // Optional additionalItems from the authenticated Responder
                             ) => {
-                                onResult("actions.handle onResponse!");
-                                console.log("actions.handle onResponse!");
-
                                 return {
                                     initiator: persona,
                                 };
                             },
                             onSuccess: (connection, additionalItems) => {
-                                console.log('Success');
-
-                                onResult("actions.handle onSuccess!");
-
-                                // TODO use additional items to set encryption key
+                                onResult({connection, additionalItems});
                             },
                         },
                     },
                     (error) => {
-                        // onError(error);
                         console.error(error);
-                        onResult(error.message || error.code);
+                        onError(`actions.handle error. ${error.message || error.code}`);
                     },
                 );
 
@@ -131,16 +98,24 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 };
 
 
-function App() {
-  return (
-    <div className="App">
-      ReactNative Slashtags web wrapper. Nothing to see here.
-        {/*<p>{`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}'`}</p>*/}
-        <button onClick={() => {
-            window.webAction('999999999', 'auth', '{"url":"slash://bq4aqaoqnddp57smqicd6ob3ntfrim6zhvjd5ji7v3aejoy423yhkutuh?act=1&tkt=zQTUR6VJTMwg"}');
-        }}>Test</button>
-    </div>
-  );
+function RNInterface() {
+    return (
+        <div className="App">
+            ReactNative Slashtags web wrapper. Nothing to see here.
+            {/*<p>{`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}'`}</p>*/}
+            {/*<button onClick={() => {*/}
+            {/*    window.webAction('999999999', 'auth', '{"url":"slash://bq4aqaoqnddp57smqicd6ob3ntfrim6zhvjd5ji7v3aejoy423yhkutuh?act=1&tkt=zhzd7pWQuVTq"}');*/}
+            {/*}}>*/}
+            {/*    Test auth*/}
+            {/*</button>*/}
+
+            {/*<button onClick={() => {*/}
+            {/*    window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"test"}');*/}
+            {/*}}>*/}
+            {/*    Test keypair*/}
+            {/*</button>*/}
+        </div>
+    );
 }
 
-export default App;
+export default RNInterface;

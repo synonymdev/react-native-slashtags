@@ -2,6 +2,10 @@
 .idea/
 web_old
 web_new_js
+web_auth_issues
 mobile_old
 lib_plain
+.DS_Store
+web/dist
+web/node_modules
 .DS_Store

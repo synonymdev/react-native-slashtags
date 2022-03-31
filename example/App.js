@@ -15,89 +15,113 @@ import {
   View,
   Button,
   TextInput,
+  ScrollView,
 } from 'react-native';
 
-import Slashtags from '@synonymdev/react-native-slashtags';
-
-import {hexStringToBytes} from '@synonymdev/react-native-slashtags/dist/helpers';
+import Slashtags, {THexKeyPair} from '@synonymdev/react-native-slashtags';
+import JSONTree from 'react-native-json-tree';
 
 const App: () => Node = () => {
   const slashRef = useRef();
   const [message, setMessage] = useState('');
-  const [url, setUrl] = useState(
-    'slash://bq4aqaoqnddp57smqicd6ob3ntfrim6zhvjd5ji7v3aejoy423yhkutuh?act=1&tkt=zN1uoYa6AffN',
-  );
+  const [keyPair, setKeyPair] = useState<THexKeyPair>('');
+  const [did, setDid] = useState<THexKeyPair>('');
+  const [authResult, setAuthResult] = useState<THexKeyPair>({});
+  const [url, setUrl] = useState('');
 
   return (
     <SafeAreaView>
-      <View style={styles.container}>
-        <Text style={styles.title}>Slashtags example</Text>
-        <Slashtags ref={slashRef} onApiReady={() => setMessage('API ready')} />
-        <Text>Message: {message}</Text>
+      <ScrollView>
+        <View style={styles.container}>
+          <Text style={styles.title}>Slashtags example</Text>
+          <Slashtags
+            ref={slashRef}
+            onApiReady={() => setMessage('Slashtags API ready')}
+          />
+          <Text>{message}</Text>
 
-        <TextInput style={styles.input} value={url} onChangeText={setUrl} />
+          <TextInput
+            placeholder={'Slashtags URL'}
+            style={styles.input}
+            value={url}
+            onChangeText={setUrl}
+          />
 
-        <Button
-          title={'didKeyFromPubKey()'}
-          onPress={async () => {
-            const pubKey = hexStringToBytes(
-              '0x6fcc37ea5e9e09fec6c83e5fbd7a745e3eee81d16ebd861c9e66f55518c19798',
-            );
-            const res = await slashRef.current.didKeyFromPubKey(pubKey);
-            setMessage(JSON.stringify(res));
-          }}
-        />
-
-        <Button
-          title={'Auth'}
-          onPress={async () => {
-            try {
-              const res = await slashRef.current.auth(
-                url,
-                (serverProfile, additionalItems) => {
-                  setMessage(JSON.stringify(serverProfile));
-                },
-                (connection: any, additionalItems: any) => {
-                  //TODO success
-                  setMessage('Authenticated!');
-                },
-                error => {
-                  setMessage(`Failed to auth (${error.message})`);
-                },
+          <Button
+            title={'Generate key pair'}
+            onPress={async () => {
+              const res = await slashRef.current.generateSeedKeyPair(
+                `todo ${new Date().getTime()}`,
               );
+              setKeyPair(res);
+            }}
+          />
 
+          <Button
+            title={'didKeyFromPubKey()'}
+            onPress={async () => {
+              const res = await slashRef.current.didKeyFromPubKey(
+                keyPair.publicKey,
+              );
+              setDid(res);
+            }}
+          />
+
+          <Button
+            title={'Auth'}
+            onPress={async () => {
+              if (!keyPair || !did) {
+                return alert('First generate a key pair and DID');
+              }
+
+              const profile = {
+                '@id': did,
+                '@context': 'https://schema.org',
+                '@type': 'Person',
+                name: 'ReactNative Demo',
+                image: 'https://www.example.com/logo.png',
+              };
+
+              try {
+                const res = await slashRef.current.auth(url, keyPair, profile);
+                setAuthResult(res);
+              } catch (e) {
+                setMessage(e.toString());
+              }
+            }}
+          />
+
+          <Button
+            title={'selfTest'}
+            onPress={async () => {
+              const res = await slashRef.current.selfTest();
               setMessage(res);
-            } catch (e) {
-              setMessage(e.toString());
-            }
-          }}
-        />
+            }}
+          />
+        </View>
 
-        <Button
-          title={'selfTest'}
-          onPress={async () => {
-            const res = await slashRef.current.selfTest();
-            setMessage(JSON.stringify(res));
-          }}
-        />
-      </View>
+        <JSONTree data={keyPair} shouldExpandNode={() => true} />
+        <JSONTree data={did} shouldExpandNode={() => true} />
+        <JSONTree data={authResult} shouldExpandNode={() => true} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 32,
+    marginTop: 16,
     paddingHorizontal: 24,
   },
   title: {
     fontSize: 24,
     fontWeight: '600',
     textAlign: 'center',
+    marginBottom: 10,
   },
   input: {
     backgroundColor: '#e8e8e8',
-    marginVertical: 20,
+    marginVertical: 10,
   },
 });
 

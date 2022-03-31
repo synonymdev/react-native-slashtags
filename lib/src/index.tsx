@@ -2,7 +2,7 @@ import React, { useEffect, forwardRef, useRef, useImperativeHandle, useState } f
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { bytesToHexString, hexStringToBytes } from './helpers';
 
-const webAppUrl = 'http://localhost:3000/';
+const webAppUrl = `http://localhost:3000/?rando=${new Date().getTime()}`;
 
 type TWebViewResolve = (res: string) => void;
 type TWebViewReject = (res: string) => void;
@@ -14,6 +14,8 @@ type TSlashtagsProps = {
 const webCallPromises: {
 	[key: string]: { resolve: TWebViewResolve; reject: TWebViewReject; time: Date };
 } = {};
+
+export type THexKeyPair = { publicKey: string; secretKey: string };
 
 export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	let webViewRef = useRef<WebView>();
@@ -40,7 +42,7 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	};
 
 	// TODO don't just return strings
-	const callWebAction = async (method: string, params: any, timeout = 3000): Promise<string> => {
+	const callWebAction = async (method: string, params: any, timeout = 3000): Promise<any> => {
 		if (!webReady) {
 			throw new Error('Slashtags API not ready');
 		}
@@ -74,24 +76,27 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 
 	useImperativeHandle(ref, () => ({
 		// TODO this will become each slashtags function
-		async didKeyFromPubKey(pubKey: Uint8Array) {
-			return await callWebAction('didKeyFromPubKey', { pubKey: bytesToHexString(pubKey) }, 1000);
+		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
+			return await callWebAction('generateSeedKeyPair', { seed }, 1000);
 		},
-		async selfTest() {
-			return await callWebAction('selfTest', { test: 'Test' }, 1000);
+		async didKeyFromPubKey(pubKey: string): Promise<string> {
+			return await callWebAction('didKeyFromPubKey', { pubKey }, 1000);
 		},
 		async auth(
 			url: string,
-			onResponse: (serverProfile: any, additionalItems: any) => any,
-			onSuccess: (connection: any, additionalItems: any) => void,
-			onError: (error: Error) => void
-		) {
-			return await callWebAction('auth', { url }, 15000);
+			keyPair: THexKeyPair,
+			profile: any
+		): Promise<{ connection: any; additionalItems: any[] }> {
+			return await callWebAction('auth', { url, keyPair, profile }, 15000);
+		},
+		async selfTest(): Promise<string> {
+			return await callWebAction('selfTest', { test: 'Test' }, 1000);
 		}
 	}));
 
 	return (
 		<WebView
+			cacheMode={'LOAD_NO_CACHE'}
 			ref={(r) => {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-expect-error

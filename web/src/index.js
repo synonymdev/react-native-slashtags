@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import RNInterface from './Interface';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <RNInterface />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
