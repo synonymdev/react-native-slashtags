@@ -1,8 +1,10 @@
 import React, { useEffect, forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
-import { bytesToHexString, hexStringToBytes } from './helpers';
+import webInterfaceHex from './web-interface';
+import { hexToString } from './helpers';
 
-const webAppUrl = `http://localhost:3000/?rando=${new Date().getTime()}`;
+const webAppUrl = `http://localhost:3000/?cache=${new Date().getTime()}`;
+const html = hexToString(webInterfaceHex);
 
 type TWebViewResolve = (res: string) => void;
 type TWebViewReject = (res: string) => void;
@@ -41,7 +43,6 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		}
 	};
 
-	// TODO don't just return strings
 	const callWebAction = async (method: string, params: any, timeout = 3000): Promise<any> => {
 		if (!webReady) {
 			throw new Error('Slashtags API not ready');
@@ -49,9 +50,9 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 
 		// Returned string in handleWebActionResponse will become the slashtags sdk response
 		const javascript = `
-		        webAction('${msgIdNonce}', '${method}', '${JSON.stringify(params)}');
-		        true;
+		        webAction('${msgIdNonce}', '${method}', '${JSON.stringify(params)}'); void(0);
 		      `;
+
 		setMsgIdNonce(msgIdNonce + 1);
 
 		if (!webViewRef) {
@@ -102,11 +103,14 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 				// @ts-expect-error
 				webViewRef = r;
 			}}
-			source={{ uri: webAppUrl }}
+			source={{ html }}
 			onLoad={setServerStarted}
 			onMessage={handleWebActionResponse}
 			onHttpError={console.error}
-			onError={console.error}
+			onError={(e) => {
+				console.warn('Web view error:');
+				console.warn(console.error);
+			}}
 		/>
 	);
 });

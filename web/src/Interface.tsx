@@ -83,8 +83,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 break;
             }
             case 'selfTest': {
-                onResult(`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}'`)
-                // onResult(`Good to go ${new Date().toLocaleTimeString()}`);
+                onResult(`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}' ${new Date().toLocaleTimeString()}`)
                 break;
             }
             default: {
@@ -99,6 +98,8 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
 
 function RNInterface() {
+    window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"tester"}');
+
     return (
         <div className="App">
             ReactNative Slashtags web wrapper. Nothing to see here.
@@ -109,11 +110,11 @@ function RNInterface() {
             {/*    Test auth*/}
             {/*</button>*/}
 
-            {/*<button onClick={() => {*/}
-            {/*    window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"test"}');*/}
-            {/*}}>*/}
-            {/*    Test keypair*/}
-            {/*</button>*/}
+            <button onClick={() => {
+                window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"tester"}');
+            }}>
+                Test Keypair
+            </button>
         </div>
     );
 }
