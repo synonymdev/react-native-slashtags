@@ -1,0 +1,7 @@
+node_modules/
+.idea/
+src/protos/*.ts
+src/protos/*.js
+dist/
+**.DS_Store
+yarn-error.log
