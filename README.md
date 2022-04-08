@@ -4,7 +4,7 @@
 
 ## Description
 
-An easy to implement React Native wrapper for [Slashtags](https://github.com/synonymdev/slashtags).
+An easy-to-implement React Native wrapper for [Slashtags](https://github.com/synonymdev/slashtags).
 
 ## Getting started
 
