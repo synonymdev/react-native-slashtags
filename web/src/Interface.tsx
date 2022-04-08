@@ -83,7 +83,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 break;
             }
             case 'selfTest': {
-                onResult(`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}' ${new Date().toLocaleTimeString()}`)
+                onResult(`global.IDBMutableFile: '${global.IDBMutableFile}' global.indexedDB: '${global.indexedDB}' time: ${new Date().toLocaleTimeString()}`)
                 break;
             }
             default: {
@@ -114,6 +114,12 @@ function RNInterface() {
                 window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"tester"}');
             }}>
                 Test Keypair
+            </button>
+
+            <button onClick={() => {
+                window.webAction('9999999998', 'selfTest', '{}');
+            }}>
+                Self Test
             </button>
         </div>
     );
