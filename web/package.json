@@ -4,7 +4,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel -p 3000",
-    "build": "parcel build"
+    "build": "rm -rf dist; parcel build"
   },
   "devDependencies": {
     "crypto-browserify": "^3.12.0",
