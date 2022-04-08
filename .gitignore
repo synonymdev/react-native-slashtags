@@ -10,3 +10,4 @@ web/dist
 web/node_modules
 .DS_Store
 lib/src/web-interface.ts
+lib/README.md

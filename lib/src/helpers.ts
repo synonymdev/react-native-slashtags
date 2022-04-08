@@ -13,7 +13,12 @@ export const bytesToHexString = (bytes: Uint8Array): string => {
  * @returns {Uint8Array}
  */
 export const hexStringToBytes = (hexString: string): Uint8Array => {
-	return new Uint8Array(hexString.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+	const bytes = hexString.match(/.{1,2}/g);
+	if (!bytes) {
+		return new Uint8Array(0);
+	}
+
+	return new Uint8Array(bytes.map((byte) => parseInt(byte, 16)));
 };
 
 export const hexToString = (str1: string): string => {
