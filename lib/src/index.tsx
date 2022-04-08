@@ -1,9 +1,8 @@
-import React, { useEffect, forwardRef, useRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
 import { hexToString } from './helpers';
 
-const webAppUrl = `http://localhost:3000/?cache=${new Date().getTime()}`;
 const html = hexToString(webInterfaceHex);
 
 type TWebViewResolve = (res: string) => void;
@@ -25,7 +24,7 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	const [webReady, setWebReady] = useState(false);
 
 	const handleWebActionResponse = (event: WebViewMessageEvent): void => {
-		const { msgId, method, result, error } = JSON.parse(event.nativeEvent.data);
+		const { msgId, result, error } = JSON.parse(event.nativeEvent.data);
 
 		const cachedPromise = webCallPromises[msgId];
 		if (cachedPromise) {
