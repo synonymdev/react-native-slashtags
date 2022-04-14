@@ -79,6 +79,7 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
 			return await callWebAction('generateSeedKeyPair', { seed }, 1000);
 		},
+		//TODO parseUrl takes url
 		async didKeyFromPubKey(pubKey: string): Promise<string> {
 			return await callWebAction('didKeyFromPubKey', { pubKey }, 1000);
 		},

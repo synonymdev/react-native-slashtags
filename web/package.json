@@ -12,13 +12,12 @@
   },
   "dependencies": {
     "@ngneat/falso": "^3.0.0",
-    "@synonymdev/slashtags-actions": "^0.1.2",
-    "@synonymdev/slashtags-auth": "^0.3.2",
-    "@synonymdev/slashtags-core": "^0.1.2",
+    "@synonymdev/slashtags-sdk": "0.1.0-alpha.4",
     "framer-motion": "^5.0.0",
     "jdenticon": "^3.1.1",
     "noise-curve-tiny-secp": "^2.0.0",
     "qrcode": "^1.5.0",
+    "randombytes": "^2.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   }
