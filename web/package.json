@@ -7,12 +7,17 @@
     "build": "rm -rf dist; parcel build"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
-    "parcel": "^2.3.2"
+    "events": "^3.3.0",
+    "parcel": "^2.3.2",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0"
   },
   "dependencies": {
     "@ngneat/falso": "^3.0.0",
-    "@synonymdev/slashtags-sdk": "0.1.0-alpha.4",
+    "@synonymdev/slashtags-auth": "^0.4.0-alpha.3",
+    "@synonymdev/slashtags-sdk": "^0.1.0-alpha.5",
     "framer-motion": "^5.0.0",
     "jdenticon": "^3.1.1",
     "noise-curve-tiny-secp": "^2.0.0",
