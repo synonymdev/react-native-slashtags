@@ -659,18 +659,18 @@
   resolved "https://registry.npmjs.org/@swc/helpers/-/helpers-0.2.14.tgz"
   integrity sha512-wpCQMhf5p5GhNg2MmGKXzUNwxe7zRiCsmqYsamez2beP7mKPCSiu+BjZcdN95yYSzO857kr0VfQewmGpS77nqA==
 
-"@synonymdev/slashtags-auth@^0.4.0-alpha.3":
-  version "0.4.0-alpha.3"
-  resolved "https://registry.npmjs.org/@synonymdev/slashtags-auth/-/slashtags-auth-0.4.0-alpha.3.tgz"
-  integrity sha512-rpkS8WpfduE6bgkhRBUPKB5t4dCdKmuG3KJsvaUOAz8PRbpFVawwcjt7pSGQrdrAMv/kTG559iR9bO99pZLdLA==
+"@synonymdev/slashtags-auth@^0.4.0-alpha.4":
+  version "0.4.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-auth/-/slashtags-auth-0.4.0-alpha.4.tgz#556ed5972f381bed125dbb84aef212bed23fad87"
+  integrity sha512-TwIJ6Mi+iZYMBDU/W3I2JiKuAitIaX6dGuDavWGKLfkJOkrZieOd3LsYtsuqOCqd69Ia0H2dD7vC8sNdKIJqxg==
   dependencies:
-    "@synonymdev/slashtags-sdk" "~0.1.0-alpha.3"
+    "@synonymdev/slashtags-sdk" "^0.1.0-alpha.6"
     compact-encoding "^2.6.1"
 
-"@synonymdev/slashtags-sdk@^0.1.0-alpha.5", "@synonymdev/slashtags-sdk@~0.1.0-alpha.3":
-  version "0.1.0-alpha.5"
-  resolved "https://registry.npmjs.org/@synonymdev/slashtags-sdk/-/slashtags-sdk-0.1.0-alpha.5.tgz"
-  integrity sha512-e+MG0lizr84XvPHlhe6MfxPuBn9xa6UFbAbEpvW7vyVjUsCEsMMhAnw5rQJDViKm4pwgpVHJ8wJVkm7ONmsAVQ==
+"@synonymdev/slashtags-sdk@^0.1.0-alpha.6":
+  version "0.1.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@synonymdev/slashtags-sdk/-/slashtags-sdk-0.1.0-alpha.6.tgz#1bcdb12a9edc8169f8b2afda6962795193d680f8"
+  integrity sha512-SV9+7D1yTSi9+NDw8hu1TrEBhyTI9+cGhiFdWeU9lMnifyMxYjSgGWssvRALYmZhxEI8DUo8gj7kvo/3QXODzA==
   dependencies:
     b4a "^1.3.1"
     blake2b-universal "^1.0.1"
@@ -683,7 +683,6 @@
     hi-base32 "^0.5.1"
     hyperbee "^1.8.0"
     hyperblobs "^2.0.0-alpha.2"
-    hypercore "^10.0.0-alpha.34"
     hyperswarm "^3.0.3"
     random-access-memory "^4.0.0"
     random-access-web "^2.0.3"
@@ -1677,7 +1676,7 @@ hypercore-promisifier@^1.0.1:
     call-me-maybe "^1.0.1"
     inspect-custom-symbol "^1.1.1"
 
-hypercore@^10.0.0-alpha.34, hypercore@next:
+hypercore@next:
   version "10.0.0-alpha.36"
   resolved "https://registry.npmjs.org/hypercore/-/hypercore-10.0.0-alpha.36.tgz"
   integrity sha512-ZKk6sDm/aGTiNfAxXkfaYeviiyno9Mo8HSQ7OP0IiaPMhOUDvGxRenyXOE4A3k029mDat54nJFOGOmzcz1bi6g==
