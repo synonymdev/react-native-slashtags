@@ -9,3 +9,4 @@ web/dist
 web/node_modules
 lib/src/web-interface.ts
 lib/README.md
+.parcel-cache

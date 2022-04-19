@@ -1,4 +1,5 @@
 import { SDK } from '@synonymdev/slashtags-sdk';
+import { SlashAuth } from '@synonymdev/slashtags-auth';
 import randomBytes from 'randombytes';
 import {useState} from 'react';
 
@@ -66,6 +67,8 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 const slashtag = await sdk.slashtag({ name });
                 const existing = await slashtag.getProfile();
 
+                slashtag.registerProtocol(SlashAuth)
+
                 console.log('Found existing profile', existing);
 
                 if (!existing) {
@@ -93,7 +96,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params.seed)));
                 break;
             }
-            case 'auth': {
+            case 'slashUrl': {
                 if (!user || !sdk) {
                     return onError(new Error("Requires setup"));
                 }
@@ -109,20 +112,26 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 const parsed = SDK.parseURL(url);
 
                 const remote = sdk.slashtag({ url });
-
-                try {
-                    await remote.ready();
-                } catch (error) {
-                    onError(error);
-                    return;
-                }
-
+                await remote.ready()
+                
                 const profile = await remote.getProfile();
                 if (!profile) alert('No profile found');
 
+                console.log('Found remote profile', profile);
+
                 switch (parsed.protocol) {
                     case 'slashauth':
-                        onResult({result: 'todo'});
+                        const auth = user.protocols.get('slashauth:alpha')
+
+                        auth.once('error', (error) => {
+                            onResult({LoginError: error});
+                        });
+
+                        auth.once('success', () => {
+                            onResult({LoginSuccess: true});
+                        });
+
+                        auth.request(url)
                         return;
                     case 'slash':
                         return;
@@ -148,10 +157,9 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
 
 function RNInterface() {
+    const [slashAuthUrl, setSlashAuthUrl] = useState('')
     // window.webAction('9999999999', 'generateSeedKeyPair', '{"seed":"tester"}');
-
-    const url = 'slashauth://vzzcuefywc6wkscdbwypcrrrz3o3375vkscxyk6srr2h6mkj762q?q=S+vFJJvNEk4=';
-
+    
     return (
         <div className="App">
             <pre>
@@ -164,6 +172,12 @@ function RNInterface() {
             {/*    Test auth*/}
             {/*</button>*/}
 
+            <input
+                placeholder="login with slashtag"
+                value={slashAuthUrl}
+                onChange={(e) => setSlashAuthUrl(e.target.value)}
+            />
+
             <button onClick={() => {
                 window.webAction('9999999999', 'setup', JSON.stringify({}));
             }}>
@@ -171,7 +185,7 @@ function RNInterface() {
             </button>
 
             <button onClick={() => {
-                window.webAction('9999999999', 'auth', JSON.stringify({url}));
+                window.webAction('9999999999', 'slashUrl', JSON.stringify({url: slashAuthUrl}));
             }}>
                 Auth
             </button>
