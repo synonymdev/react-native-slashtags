@@ -45,7 +45,6 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
     try {
         switch (method) {
             case 'setupSDK': {
-                // TODO maybe relays can be cached or separate setup method for SDK and profile details
                 const { relays } = params;
                 const primaryKey = hexStringToBytes(params.primaryKey);
 
@@ -128,8 +127,6 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 if (!profile) {
                     return onError('No remote profile found');
                 };
-
-                console.log('Found remote profile', profile);
 
                 switch (parsed.protocol) {
                     case 'slashauth':
