@@ -76,8 +76,6 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 slashtag.registerProtocol(SlashAuth)
 
-                console.log('Found existing profile', existing);
-
                 if (!existing) {
                     const profile = {
                         id: slashtag.url,
@@ -87,8 +85,6 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                     await slashtag.setProfile(profile);
                 }
 
-                console.log('Created a slashtag', slashtag.url);
-
                 currentProfile = slashtag;
 
                 onResult({slashtag: currentProfile.url});
@@ -96,6 +92,9 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 break;
             }
             case 'parseUrl': {
+                if (!params.url) {
+                    return onError('Missing url');
+                }
                 const res = SDK.parseURL(params.url);
                 res.key = bytesToHexString(res.key);
                 onResult(res);

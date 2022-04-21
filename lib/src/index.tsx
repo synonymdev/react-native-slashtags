@@ -48,10 +48,8 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 				cachedPromise.resolve(result);
 			}
 
-			// TODO release webCallPromises index from memory
-
 			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			// delete webCallPromises[msgId];
+			delete webCallPromises[msgId];
 		}
 	};
 
@@ -78,7 +76,14 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		return await new Promise(function (resolve: TWebViewResolve, reject: TWebViewReject) {
 			webCallPromises[msgIdNonce] = { resolve, reject, time: new Date() };
 
-			// TODO add a timeout and reject the promise if it still exists after timeout
+			// Timeout failsafe
+			setTimeout(() => {
+				if (webCallPromises[msgIdNonce]) {
+					const errMsg = `Interface method call '${method}' timeout`;
+					console.error(errMsg);
+					webCallPromises[msgIdNonce].reject(errMsg);
+				}
+			}, timeout);
 		});
 	};
 
@@ -105,7 +110,7 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 			return await callWebAction('setProfile', params, 1000);
 		},
 		async parseUrl(url: string): Promise<TUrlParseResult> {
-			return await callWebAction('parseUrl', { url }, 250);
+			return await callWebAction('parseUrl', { url }, 500);
 		},
 		async slashUrl(url: string): Promise<TSlashUrlResult> {
 			return await callWebAction('slashUrl', { url }, 10000);

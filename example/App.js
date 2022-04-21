@@ -68,8 +68,12 @@ const App: () => Node = () => {
           <Button
             title={'Parse URL'}
             onPress={async () => {
-              const res = await slashRef.current.parseUrl(url);
-              setParseResult(res);
+              try {
+                const res = await slashRef.current.parseUrl(url);
+                setParseResult(res);
+              } catch (e) {
+                setMessage(e);
+              }
             }}
           />
 
