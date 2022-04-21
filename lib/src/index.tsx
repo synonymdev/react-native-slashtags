@@ -2,7 +2,7 @@ import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react'
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
 import { hexToString, bytesToHexString } from './helpers';
-import { validateSetup } from './validators';
+import { validateSetProfile, validateSetup } from './validators';
 
 const html = hexToString(webInterfaceHex);
 
@@ -21,12 +21,14 @@ export type THexKeyPair = { publicKey: string; secretKey: string };
 export type TUrlParseResult = { protocol: string; key: string; query: any };
 export type TBasicProfile = { type: string; name: string };
 export type TSetupParams = {
-	name: string;
 	primaryKey: Uint8Array | string;
-	basicProfile: TBasicProfile;
 	relays: string[];
 };
-export type TSetupResult = { slashtag: string };
+export type TSetProfileParams = {
+	name: string;
+	basicProfile: TBasicProfile;
+};
+export type TSetProfileResult = { slashtag: string };
 export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 
 export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
@@ -90,13 +92,17 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
 			return await callWebAction('generateSeedKeyPair', { seed }, 1000);
 		},
-		async setup(params: TSetupParams): Promise<TSetupResult> {
+		async setupSDK(params: TSetupParams): Promise<void> {
 			validateSetup(params);
 			if (typeof params.primaryKey !== 'string') {
 				// Strings need to be passed
 				params.primaryKey = bytesToHexString(params.primaryKey);
 			}
-			return await callWebAction('setup', params, 1000);
+			await callWebAction('setupSDK', params, 1000);
+		},
+		async setProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
+			validateSetProfile(params);
+			return await callWebAction('setProfile', params, 1000);
 		},
 		async parseUrl(url: string): Promise<TUrlParseResult> {
 			return await callWebAction('parseUrl', { url }, 250);
@@ -104,8 +110,8 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		async slashUrl(url: string): Promise<TSlashUrlResult> {
 			return await callWebAction('slashUrl', { url }, 10000);
 		},
-		async selfTest(): Promise<string> {
-			return await callWebAction('selfTest', { test: 'Test' }, 1000);
+		async state(message: string): Promise<any> {
+			return await callWebAction('state', { message }, 1000);
 		}
 	}));
 

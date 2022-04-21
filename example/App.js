@@ -21,7 +21,7 @@ import {
 import Slashtags, {
   THexKeyPair,
   TUrlParseResult,
-  TSetupResult,
+  TSetProfileResult,
   TSlashUrlResult,
 } from '@synonymdev/react-native-slashtags';
 import JSONTree from 'react-native-json-tree';
@@ -30,9 +30,11 @@ const App: () => Node = () => {
   const slashRef = useRef();
   const [message, setMessage] = useState('');
   const [keyPair, setKeyPair] = useState<THexKeyPair>('');
-  const [setupResult, setSetupResult] = useState<TSetupResult>({});
+  const [setupSdkResult, setSetupSdkResult] = useState({});
+  const [profileResult, setProfileResult] = useState<TSetProfileResult>({});
   const [parseResult, setParseResult] = useState<TUrlParseResult>({});
   const [authResult, setAuthResult] = useState<TSlashUrlResult>({});
+  const [state, setState] = useState<any>({});
   const [url, setUrl] = useState('');
 
   return (
@@ -72,6 +74,25 @@ const App: () => Node = () => {
           />
 
           <Button
+            title={'Setup SDK'}
+            onPress={async () => {
+              if (!keyPair) {
+                return setMessage('Create key pair first');
+              }
+
+              try {
+                await slashRef.current.setupSDK({
+                  primaryKey: keyPair.secretKey,
+                  relays: ['ws://localhost:8888'],
+                });
+                setSetupSdkResult({sdkReady: true});
+              } catch (e) {
+                setMessage(e.toString());
+              }
+            }}
+          />
+
+          <Button
             title={'Setup profile'}
             onPress={async () => {
               if (!keyPair) {
@@ -79,16 +100,14 @@ const App: () => Node = () => {
               }
 
               try {
-                const res = await slashRef.current.setup({
+                const res = await slashRef.current.setProfile({
                   name: 'my-first-profile',
                   basicProfile: {
                     name: 'ReactNativeSlashtagsExample',
                     type: 'Person',
                   },
-                  primaryKey: keyPair.secretKey,
-                  relays: ['ws://localhost:8888'],
                 });
-                setSetupResult(res);
+                setProfileResult(res);
               } catch (e) {
                 setMessage(e.toString());
               }
@@ -108,18 +127,20 @@ const App: () => Node = () => {
           />
 
           <Button
-            title={'Self test'}
+            title={'State'}
             onPress={async () => {
-              const res = await slashRef.current.selfTest();
-              setMessage(res);
+              const res = await slashRef.current.state({message: 'Hi from RN'});
+              setState(res);
             }}
           />
         </View>
 
         <JSONTree data={keyPair} shouldExpandNode={() => true} />
-        <JSONTree data={setupResult} shouldExpandNode={() => true} />
         <JSONTree data={parseResult} shouldExpandNode={() => true} />
+        <JSONTree data={setupSdkResult} shouldExpandNode={() => true} />
+        <JSONTree data={profileResult} shouldExpandNode={() => true} />
         <JSONTree data={authResult} shouldExpandNode={() => true} />
+        <JSONTree data={state} shouldExpandNode={() => true} />
       </ScrollView>
     </SafeAreaView>
   );
