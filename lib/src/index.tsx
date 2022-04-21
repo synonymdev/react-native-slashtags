@@ -1,7 +1,8 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
-import { hexToString } from './helpers';
+import { hexToString, bytesToHexString } from './helpers';
+import { validateSetup } from './validators';
 
 const html = hexToString(webInterfaceHex);
 
@@ -17,6 +18,16 @@ const webCallPromises: {
 } = {};
 
 export type THexKeyPair = { publicKey: string; secretKey: string };
+export type TUrlParseResult = { protocol: string; key: string; query: any };
+export type TBasicProfile = { type: string; name: string };
+export type TSetupParams = {
+	name: string;
+	primaryKey: Uint8Array | string;
+	basicProfile: TBasicProfile;
+	relays: string[];
+};
+export type TSetupResult = { slashtag: string };
+export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 
 export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	let webViewRef = useRef<WebView>();
@@ -75,20 +86,23 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	};
 
 	useImperativeHandle(ref, () => ({
-		// TODO this will become each slashtags function
+		// TODO add each slashtags function here
 		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
 			return await callWebAction('generateSeedKeyPair', { seed }, 1000);
 		},
-		//TODO parseUrl takes url
-		async didKeyFromPubKey(pubKey: string): Promise<string> {
-			return await callWebAction('didKeyFromPubKey', { pubKey }, 1000);
+		async setup(params: TSetupParams): Promise<TSetupResult> {
+			validateSetup(params);
+			if (typeof params.primaryKey !== 'string') {
+				// Strings need to be passed
+				params.primaryKey = bytesToHexString(params.primaryKey);
+			}
+			return await callWebAction('setup', params, 1000);
 		},
-		async auth(
-			url: string,
-			keyPair: THexKeyPair,
-			profile: any
-		): Promise<{ connection: any; additionalItems: any[] }> {
-			return await callWebAction('auth', { url, keyPair, profile }, 15000);
+		async parseUrl(url: string): Promise<TUrlParseResult> {
+			return await callWebAction('parseUrl', { url }, 250);
+		},
+		async slashUrl(url: string): Promise<TSlashUrlResult> {
+			return await callWebAction('slashUrl', { url }, 10000);
 		},
 		async selfTest(): Promise<string> {
 			return await callWebAction('selfTest', { test: 'Test' }, 1000);

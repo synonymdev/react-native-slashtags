@@ -18,15 +18,21 @@ import {
   ScrollView,
 } from 'react-native';
 
-import Slashtags, {THexKeyPair} from '@synonymdev/react-native-slashtags';
+import Slashtags, {
+  THexKeyPair,
+  TUrlParseResult,
+  TSetupResult,
+  TSlashUrlResult,
+} from '@synonymdev/react-native-slashtags';
 import JSONTree from 'react-native-json-tree';
 
 const App: () => Node = () => {
   const slashRef = useRef();
   const [message, setMessage] = useState('');
   const [keyPair, setKeyPair] = useState<THexKeyPair>('');
-  const [did, setDid] = useState<THexKeyPair>('');
-  const [authResult, setAuthResult] = useState<THexKeyPair>({});
+  const [setupResult, setSetupResult] = useState<TSetupResult>({});
+  const [parseResult, setParseResult] = useState<TUrlParseResult>({});
+  const [authResult, setAuthResult] = useState<TSlashUrlResult>({});
   const [url, setUrl] = useState('');
 
   return (
@@ -58,32 +64,42 @@ const App: () => Node = () => {
           />
 
           <Button
-            title={'didKeyFromPubKey()'}
+            title={'Parse URL'}
             onPress={async () => {
-              const res = await slashRef.current.didKeyFromPubKey(
-                keyPair.publicKey,
-              );
-              setDid(res);
+              const res = await slashRef.current.parseUrl(url);
+              setParseResult(res);
+            }}
+          />
+
+          <Button
+            title={'Setup profile'}
+            onPress={async () => {
+              if (!keyPair) {
+                return setMessage('Create key pair first');
+              }
+
+              try {
+                const res = await slashRef.current.setup({
+                  name: 'my-first-profile',
+                  basicProfile: {
+                    name: 'ReactNativeSlashtagsExample',
+                    type: 'Person',
+                  },
+                  primaryKey: keyPair.secretKey,
+                  relays: ['ws://localhost:8888'],
+                });
+                setSetupResult(res);
+              } catch (e) {
+                setMessage(e.toString());
+              }
             }}
           />
 
           <Button
             title={'Auth'}
             onPress={async () => {
-              if (!keyPair || !did) {
-                return alert('First generate a key pair and DID');
-              }
-
-              const profile = {
-                '@id': did,
-                '@context': 'https://schema.org',
-                '@type': 'Person',
-                name: 'ReactNative Demo',
-                image: 'https://www.example.com/logo.png',
-              };
-
               try {
-                const res = await slashRef.current.auth(url, keyPair, profile);
+                const res = await slashRef.current.slashUrl(url);
                 setAuthResult(res);
               } catch (e) {
                 setMessage(e.toString());
@@ -92,7 +108,7 @@ const App: () => Node = () => {
           />
 
           <Button
-            title={'selfTest'}
+            title={'Self test'}
             onPress={async () => {
               const res = await slashRef.current.selfTest();
               setMessage(res);
@@ -101,7 +117,8 @@ const App: () => Node = () => {
         </View>
 
         <JSONTree data={keyPair} shouldExpandNode={() => true} />
-        <JSONTree data={did} shouldExpandNode={() => true} />
+        <JSONTree data={setupResult} shouldExpandNode={() => true} />
+        <JSONTree data={parseResult} shouldExpandNode={() => true} />
         <JSONTree data={authResult} shouldExpandNode={() => true} />
       </ScrollView>
     </SafeAreaView>
