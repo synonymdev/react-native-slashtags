@@ -1,7 +1,8 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
-import { hexToString } from './helpers';
+import { hexToString, bytesToHexString } from './helpers';
+import { validateSetProfile, validateSetup } from './validators';
 
 const html = hexToString(webInterfaceHex);
 
@@ -17,6 +18,18 @@ const webCallPromises: {
 } = {};
 
 export type THexKeyPair = { publicKey: string; secretKey: string };
+export type TUrlParseResult = { protocol: string; key: string; query: any };
+export type TBasicProfile = { type: string; name: string };
+export type TSetupParams = {
+	primaryKey: Uint8Array | string;
+	relays: string[];
+};
+export type TSetProfileParams = {
+	name: string;
+	basicProfile: TBasicProfile;
+};
+export type TSetProfileResult = { slashtag: string };
+export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 
 export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	let webViewRef = useRef<WebView>();
@@ -35,10 +48,8 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 				cachedPromise.resolve(result);
 			}
 
-			// TODO release webCallPromises index from memory
-
 			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			// delete webCallPromises[msgId];
+			delete webCallPromises[msgId];
 		}
 	};
 
@@ -65,7 +76,14 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		return await new Promise(function (resolve: TWebViewResolve, reject: TWebViewReject) {
 			webCallPromises[msgIdNonce] = { resolve, reject, time: new Date() };
 
-			// TODO add a timeout and reject the promise if it still exists after timeout
+			// Timeout failsafe
+			setTimeout(() => {
+				if (webCallPromises[msgIdNonce]) {
+					const errMsg = `Interface method call '${method}' timeout`;
+					console.error(errMsg);
+					webCallPromises[msgIdNonce].reject(errMsg);
+				}
+			}, timeout);
 		});
 	};
 
@@ -75,22 +93,30 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	};
 
 	useImperativeHandle(ref, () => ({
-		// TODO this will become each slashtags function
+		// TODO add each slashtags function here
 		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
 			return await callWebAction('generateSeedKeyPair', { seed }, 1000);
 		},
-		async didKeyFromPubKey(pubKey: string): Promise<string> {
-			return await callWebAction('didKeyFromPubKey', { pubKey }, 1000);
+		async setupSDK(params: TSetupParams): Promise<void> {
+			validateSetup(params);
+			if (typeof params.primaryKey !== 'string') {
+				// Strings need to be passed
+				params.primaryKey = bytesToHexString(params.primaryKey);
+			}
+			await callWebAction('setupSDK', params, 1000);
 		},
-		async auth(
-			url: string,
-			keyPair: THexKeyPair,
-			profile: any
-		): Promise<{ connection: any; additionalItems: any[] }> {
-			return await callWebAction('auth', { url, keyPair, profile }, 15000);
+		async setProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
+			validateSetProfile(params);
+			return await callWebAction('setProfile', params, 1000);
 		},
-		async selfTest(): Promise<string> {
-			return await callWebAction('selfTest', { test: 'Test' }, 1000);
+		async parseUrl(url: string): Promise<TUrlParseResult> {
+			return await callWebAction('parseUrl', { url }, 500);
+		},
+		async slashUrl(url: string): Promise<TSlashUrlResult> {
+			return await callWebAction('slashUrl', { url }, 10000);
+		},
+		async state(message: string): Promise<any> {
+			return await callWebAction('state', { message }, 1000);
 		}
 	}));
 
