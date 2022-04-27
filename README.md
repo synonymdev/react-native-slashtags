@@ -33,7 +33,7 @@ const App: () => Node = () => {
     <View>
       <Slashtags
         ref={slashRef}
-        onApiReady={() => setMessage("Slashtags API ready")}
+        onApiReady={() => console.log("Slashtags API ready")}
       />
 
       <Button

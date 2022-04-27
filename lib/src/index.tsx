@@ -3,6 +3,7 @@ import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
 import { hexToString, bytesToHexString } from './helpers';
 import { validateSetProfile, validateSetup } from './validators';
+import { View } from 'react-native';
 
 const html = hexToString(webInterfaceHex);
 
@@ -121,21 +122,23 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 	}));
 
 	return (
-		<WebView
-			cacheMode={'LOAD_NO_CACHE'}
-			ref={(r) => {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-expect-error
-				webViewRef = r;
-			}}
-			source={{ html }}
-			onLoad={setServerStarted}
-			onMessage={handleWebActionResponse}
-			onHttpError={console.error}
-			onError={(e) => {
-				console.warn('Web view error:');
-				console.warn(console.error);
-			}}
-		/>
+		<View style={{ width: 0, height: 0 }}>
+			<WebView
+				cacheMode={'LOAD_NO_CACHE'}
+				ref={(r) => {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-expect-error
+					webViewRef = r;
+				}}
+				source={{ html }}
+				onLoad={setServerStarted}
+				onMessage={handleWebActionResponse}
+				onHttpError={console.error}
+				onError={(e) => {
+					console.warn('Web view error:');
+					console.warn(console.error);
+				}}
+			/>
+		</View>
 	);
 });

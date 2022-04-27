@@ -1,7 +1,7 @@
 {
   "name": "@synonymdev/react-native-slashtags",
   "title": "React Native Slashtags",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "React Native wrapper for Slashtags",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

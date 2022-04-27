@@ -121,7 +121,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 const parsed = SDK.parseURL(url);
 
                 const remote = sdk.slashtag({ url });
-                await remote.ready()
+                await remote.ready();
 
                 const profile = await remote.getProfile();
                 if (!profile) {
