@@ -100,7 +100,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 break;
             }
             case 'generateSeedKeyPair': {
-                onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params.seed)));
+                onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params)));
                 break;
             }
             case 'slashUrl': {
