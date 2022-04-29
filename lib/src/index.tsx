@@ -1,22 +1,7 @@
-import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
-import { WebView, WebViewMessageEvent } from 'react-native-webview';
-import webInterfaceHex from './web-interface';
-import { hexToString, bytesToHexString } from './helpers';
-import { validateSetProfile, validateSetup } from './validators';
-import { View } from 'react-native';
-
-const html = hexToString(webInterfaceHex);
-
-type TWebViewResolve = (res: string) => void;
-type TWebViewReject = (e: Error) => void;
-
-const webCallPromises: {
-	[key: string]: { resolve: TWebViewResolve; reject: TWebViewReject; time: Date };
-} = {};
+import React, { createContext, useContext, useRef } from 'react';
+import RNInterface from './rn-interface';
 
 export type THexKeyPair = { publicKey: string; secretKey: string };
-export type TKeyPairResult = { seed: string; keyPair: THexKeyPair };
-
 export type TUrlParseResult = { protocol: string; key: string; query: any };
 export type TBasicProfile = { type: string; name: string };
 export type TSetupParams = {
@@ -34,117 +19,25 @@ export type TSetProfileResult = {
 };
 export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 
-type TSlashtagsProps = {
-	onApiReady: () => void;
+export const SlashtagsContext = createContext({ current: undefined }); // TODO set types
+
+const SlashtagsContextStore = (props: any): JSX.Element => {
+	const ref = useRef();
+	return <SlashtagsContext.Provider value={ref}>{props.children}</SlashtagsContext.Provider>;
 };
 
-export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
-	let webViewRef = useRef<WebView>();
-	const [msgIdNonce, setMsgIdNonce] = useState(0);
-	const [webReady, setWebReady] = useState(false);
+const SlashtagsInterface = (): JSX.Element => {
+	const slashtagsRef = useContext(SlashtagsContext);
+	return <RNInterface onApiReady={() => console.log('Slashtags API ready')} ref={slashtagsRef} />;
+};
 
-	const handleWebActionResponse = (event: WebViewMessageEvent): void => {
-		const { msgId, result, error } = JSON.parse(event.nativeEvent.data);
-
-		const cachedPromise = webCallPromises[msgId];
-		if (cachedPromise) {
-			if (error) {
-				console.error(error);
-				cachedPromise.reject(error);
-			} else {
-				cachedPromise.resolve(result);
-			}
-
-			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			delete webCallPromises[msgId];
-		}
-	};
-
-	const callWebAction = async (method: string, params: any, timeout = 3000): Promise<any> => {
-		if (!webReady) {
-			throw new Error('Slashtags API not ready');
-		}
-
-		// Returned string in handleWebActionResponse will become the slashtags sdk response
-		const javascript = `
-		        webAction('${msgIdNonce}', '${method}', '${JSON.stringify(params)}'); void(0);
-		      `;
-
-		setMsgIdNonce(msgIdNonce + 1);
-
-		if (!webViewRef) {
-			throw Error('webViewRef not set');
-		}
-
-		// @ts-expect-error it does exist
-		webViewRef.injectJavaScript(javascript);
-
-		// Cache the promise, it'll be resolved/rejected above when a response from the web app is received in handleWebActionResponse
-		return await new Promise(function (resolve: TWebViewResolve, reject: TWebViewReject) {
-			webCallPromises[msgIdNonce] = { resolve, reject, time: new Date() };
-
-			// Timeout failsafe
-			setTimeout(() => {
-				if (webCallPromises[msgIdNonce]) {
-					const errMsg = `Interface method call '${method}' timeout`;
-					console.error(errMsg);
-					webCallPromises[msgIdNonce].reject(new Error(errMsg));
-				}
-			}, timeout);
-		});
-	};
-
-	const setServerStarted = (): void => {
-		setWebReady(true);
-		onApiReady();
-	};
-
-	useImperativeHandle(ref, () => ({
-		// TODO add each slashtags function here
-		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
-			return await callWebAction('generateSeedKeyPair', seed, 1000);
-		},
-		async setupSDK(params: TSetupParams): Promise<void> {
-			validateSetup(params);
-			if (typeof params.primaryKey !== 'string') {
-				// Strings need to be passed
-				params.primaryKey = bytesToHexString(params.primaryKey);
-			}
-			await callWebAction('setupSDK', params, 1000);
-		},
-		async setProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
-			validateSetProfile(params);
-			return await callWebAction('setProfile', params, 1000);
-		},
-		async parseUrl(url: string): Promise<TUrlParseResult> {
-			return await callWebAction('parseUrl', url, 500);
-		},
-		async slashUrl(url: string): Promise<TSlashUrlResult> {
-			return await callWebAction('slashUrl', url, 10000);
-		},
-		async state(message: string): Promise<any> {
-			return await callWebAction('state', { message }, 1000);
-		}
-	}));
-
+export const SlashtagsProvider = ({ children }: { children: any }): JSX.Element => {
 	return (
-		<View style={{ width: 0, height: 0 }}>
-			<WebView
-				cacheMode={'LOAD_NO_CACHE'}
-				ref={(r) => {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-expect-error
-					webViewRef = r;
-				}}
-				source={{ html }}
-				onLoad={setServerStarted}
-				onMessage={handleWebActionResponse}
-				onHttpError={console.error}
-				onError={(e) => {
-					console.warn('Web view error:');
-					console.warn(console.error);
-				}}
-			/>
-		</View>
+		<SlashtagsContextStore>
+			<SlashtagsInterface />
+			{children}
+		</SlashtagsContextStore>
 	);
-});
+};
+
+export default SlashtagsProvider;
