@@ -6,6 +6,17 @@
 
 An easy-to-implement React Native wrapper for [Slashtags](https://github.com/synonymdev/slashtags).
 
+## Available features
+- [x] Generate key pair from seed
+- [x] Setup SDK. Required from adding profiles and authentication.
+- [x] Add profiles. Latest one to be set will be used when authenticating.
+- [x] Parse URL. Decodes a slashtag URL.
+- [x] Slashtags authentication.
+- [x] Get debug state.
+- [ ] Drive (coming soon)
+- [ ] Feeds (coming soon)
+- [ ] Pay (coming soon)
+
 ## Getting started
 
 ```bash
@@ -19,33 +30,61 @@ cd ios && pod install && cd ../
 
 ## Usage
 
+Wrap app root or top level in provider
+
 ```javascript
-import Slashtags from "@synonymdev/react-native-slashtags";
+import SlashtagsProvider from '@synonymdev/react-native-slashtags';
+
+//  Slashtags functions can be accessed by all child components
+const App = () => {
+  return (
+    <SlashtagsProvider>
+      <Demo />
+    </SlashtagsProvider>
+  );
+};
 ```
 
-```javascript
-const App: () => Node = () => {
-  // Reference used to call all available Slashtags functions
-  const slashRef = useRef();
+Any child component can access slashtags functions via useContext()
 
-  // Slashtags component must be included once in your app. Prefereably in the app root.
+```javascript
+const Demo = () => {
+  const context = useContext(SlashtagsContext);
+  const [slashRef, setSlashRef] = useState();
+  useEffect(() => {
+    setSlashRef(context);
+  }, [context]);
+
   return (
     <View>
-      <Slashtags
-        ref={slashRef}
-        onApiReady={() => console.log("Slashtags API ready")}
-      />
+        <Button
+          title={'Generate key pair'}
+          onPress={async () => {
+            try {
+              const keyPair = await slashRef.current.generateSeedKeyPair(`random-seed-here`);
+              alert(keyPair.publicKey);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+        />
 
-      <Button
-        title={"Self Test"}
-        onPress={async () => {
-          const res = await slashRef.current.selfTest();
-          alert(res);
-        }}
-      />
+        <Button
+          title={'Parse URL'}
+          onPress={async () => {
+            try {
+              const url = 'slashauth://i5ubvtggukkuxdhyv7rkxtj2a2dulonpcurt4ftq4kot5nnkhdna?q=ij2c7zf9gu';
+              const parsed = await slashRef.current.parseUrl(url);
+              alert(parsed.protocol);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+        />
     </View>
   );
 };
+
 ```
 
 ## Project breakdown
