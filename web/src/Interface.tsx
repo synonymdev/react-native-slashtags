@@ -86,21 +86,23 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 currentProfile = slashtag;
 
-                onResult({slashtag: currentProfile.url});
+                onResult({name, isNew: !existing, slashtag: currentProfile.url});
 
                 break;
             }
             case 'parseUrl': {
-                if (!params.url) {
+                const url = params;
+
+                if (!url) {
                     return onError('Missing url');
                 }
-                const res = SDK.parseURL(params.url);
+                const res = SDK.parseURL(url);
                 res.key = bytesToHexString(res.key);
                 onResult(res);
                 break;
             }
             case 'generateSeedKeyPair': {
-                onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params.seed)));
+                onResult(bytesKeyPairToStringKeyPair(curve.generateSeedKeyPair(params)));
                 break;
             }
             case 'slashUrl': {
@@ -112,7 +114,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                     return onError('Requires setProfile()');
                 }
 
-                const {url} = params;
+                const url = params;
                 if (!url) {
                     onError(new Error("Missing url param"));
                     return;
@@ -121,7 +123,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 const parsed = SDK.parseURL(url);
 
                 const remote = sdk.slashtag({ url });
-                await remote.ready()
+                await remote.ready();
 
                 const profile = await remote.getProfile();
                 if (!profile) {
