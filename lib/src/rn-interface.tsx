@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import webInterfaceHex from './web-interface';
 import { hexToString, bytesToHexString } from './helpers';
@@ -26,8 +26,16 @@ type TSlashtagsProps = {
 	onApiReady: () => void;
 };
 
+type TWebMethod =
+	| 'generateSeedKeyPair'
+	| 'setupSDK'
+	| 'setProfile'
+	| 'parseUrl'
+	| 'slashUrl'
+	| 'state';
+
 export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
-	let webViewRef = useRef<WebView>();
+	const [webViewRef, setWebViewRef] = useState<WebView>();
 	const [msgIdNonce, setMsgIdNonce] = useState(0);
 	const [webReady, setWebReady] = useState(false);
 
@@ -48,39 +56,41 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		}
 	};
 
-	const callWebAction = async (method: string, params: any, timeout = 3000): Promise<any> => {
-		if (!webReady) {
-			throw new Error('Slashtags API not ready');
-		}
+	const callWebAction = useCallback(
+		async (method: TWebMethod, params: any, timeout = 3000): Promise<any> => {
+			if (!webReady) {
+				throw new Error('Slashtags API not ready');
+			}
 
-		// Returned string in handleWebActionResponse will become the slashtags sdk response
-		const javascript = `
+			// Returned string in handleWebActionResponse will become the slashtags sdk response
+			const javascript = `
 		        webAction('${msgIdNonce}', '${method}', '${JSON.stringify(params)}'); void(0);
 		      `;
 
-		setMsgIdNonce(msgIdNonce + 1);
+			setMsgIdNonce(msgIdNonce + 1);
 
-		if (!webViewRef) {
-			throw Error('webViewRef not set');
-		}
+			if (!webViewRef) {
+				throw Error('webViewRef not set');
+			}
 
-		// @ts-expect-error it does exist
-		webViewRef.injectJavaScript(javascript);
+			webViewRef.injectJavaScript(javascript);
 
-		// Cache the promise, it'll be resolved/rejected above when a response from the web app is received in handleWebActionResponse
-		return await new Promise(function (resolve: TWebViewResolve, reject: TWebViewReject) {
-			webCallPromises[msgIdNonce] = { resolve, reject, time: new Date() };
+			// Cache the promise, it'll be resolved/rejected above when a response from the web app is received in handleWebActionResponse
+			return await new Promise(function (resolve: TWebViewResolve, reject: TWebViewReject) {
+				webCallPromises[msgIdNonce] = { resolve, reject, time: new Date() };
 
-			// Timeout failsafe
-			setTimeout(() => {
-				if (webCallPromises[msgIdNonce]) {
-					const errMsg = `Interface method call '${method}' timeout`;
-					console.error(errMsg);
-					webCallPromises[msgIdNonce].reject(new Error(errMsg));
-				}
-			}, timeout);
-		});
-	};
+				// Timeout failsafe
+				setTimeout(() => {
+					if (webCallPromises[msgIdNonce]) {
+						const errMsg = `Interface method call '${method}' timeout`;
+						console.error(errMsg);
+						webCallPromises[msgIdNonce].reject(new Error(errMsg));
+					}
+				}, timeout);
+			});
+		},
+		[msgIdNonce, webReady, webViewRef]
+	);
 
 	const setServerStarted = (): void => {
 		setWebReady(true);
@@ -122,7 +132,7 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 				ref={(r) => {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error
-					webViewRef = r;
+					setWebViewRef(r);
 				}}
 				source={{ html }}
 				onLoad={setServerStarted}
