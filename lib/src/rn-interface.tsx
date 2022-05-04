@@ -6,6 +6,7 @@ import { validateSetProfile, validateSetup } from './validators';
 import { View } from 'react-native';
 import {
 	THexKeyPair,
+	TRnSlashtags,
 	TSetProfileParams,
 	TSetProfileResult,
 	TSetupParams,
@@ -97,8 +98,8 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		onApiReady();
 	};
 
-	useImperativeHandle(ref, () => ({
-		// TODO add each slashtags function here
+	const rnSlashtags: TRnSlashtags = {
+		// TODO add each slashtags function here and types to TRnSlashtags
 		async generateSeedKeyPair(seed: string): Promise<THexKeyPair> {
 			return await callWebAction('generateSeedKeyPair', seed, 1000);
 		},
@@ -123,7 +124,9 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 		async state(message: string): Promise<any> {
 			return await callWebAction('state', { message }, 1000);
 		}
-	}));
+	};
+
+	useImperativeHandle(ref, () => rnSlashtags);
 
 	return (
 		<View style={{ width: 0, height: 0 }}>

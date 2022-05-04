@@ -19,11 +19,22 @@ export type TSetProfileResult = {
 };
 export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 
-export const SlashtagsContext = createContext({ current: undefined }); // TODO set types
+export type TRnSlashtags = {
+	generateSeedKeyPair: (seed: string) => Promise<THexKeyPair>;
+	setupSDK: (params: TSetupParams) => Promise<void>;
+	setProfile: (params: TSetProfileParams) => Promise<TSetProfileResult>;
+	parseUrl: (url: string) => Promise<TUrlParseResult>;
+	slashUrl: (url: string) => Promise<TSlashUrlResult>;
+	state: (message: string) => Promise<any>;
+};
+
+export const SlashtagsContext = createContext<{ current: TRnSlashtags | undefined }>({
+	current: undefined
+});
 
 const SlashtagsContextStore = (props: any): JSX.Element => {
 	const ref = useRef();
-	return <SlashtagsContext.Provider value={ref}>{props.children}</SlashtagsContext.Provider>;
+	return <SlashtagsContext.Provider value={ref} {...props} />;
 };
 
 const SlashtagsInterface = (): JSX.Element => {
