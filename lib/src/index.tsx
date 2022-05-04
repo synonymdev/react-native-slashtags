@@ -21,7 +21,7 @@ export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 export type TSdkState = {
 	sdkSetup: boolean;
 	profiles: number;
-	relays: string;
+	relays: string[];
 };
 export type TOnApiReady = () => void;
 

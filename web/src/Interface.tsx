@@ -90,6 +90,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 break;
             }
+            //TODO split updateProfile with setProfile
             case 'parseUrl': {
                 const url = params;
 
@@ -156,13 +157,13 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 let info = {
                     sdkSetup: false,
                     profiles: 0,
-                    relays: '',
+                    relays: [],
                 };
 
                 if (sdk) {
                     info.sdkSetup = true;
                     info.profiles = sdk.slashtags.size;
-                    info.relays = sdk.opts.relays.toString();
+                    info.relays = sdk.opts.relays;
                 }
 
                 onResult(info);
