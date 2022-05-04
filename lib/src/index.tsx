@@ -18,7 +18,12 @@ export type TSetProfileResult = {
 	slashtag: string;
 };
 export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
-export type TOnApiReady = (() => void) | undefined;
+export type TSdkState = {
+	sdkSetup: boolean;
+	profiles: number;
+	relays: string;
+};
+export type TOnApiReady = () => void;
 
 export type TRnSlashtags = {
 	generateSeedKeyPair: (seed: string) => Promise<THexKeyPair>;
@@ -26,7 +31,7 @@ export type TRnSlashtags = {
 	setProfile: (params: TSetProfileParams) => Promise<TSetProfileResult>;
 	parseUrl: (url: string) => Promise<TUrlParseResult>;
 	slashUrl: (url: string) => Promise<TSlashUrlResult>;
-	state: (message: string) => Promise<any>;
+	state: () => Promise<TSdkState>;
 };
 
 export const SlashtagsContext = createContext<{ current: TRnSlashtags | undefined }>({
@@ -38,7 +43,7 @@ const SlashtagsContextStore = (props: any): JSX.Element => {
 	return <SlashtagsContext.Provider value={ref} {...props} />;
 };
 
-const SlashtagsInterface = ({ onApiReady }: { onApiReady: TOnApiReady }): JSX.Element => {
+const SlashtagsInterface = ({ onApiReady }: { onApiReady?: TOnApiReady }): JSX.Element => {
 	const slashtagsRef = useContext(SlashtagsContext);
 	return <RNInterface onApiReady={onApiReady} ref={slashtagsRef} />;
 };
@@ -48,7 +53,7 @@ export const SlashtagsProvider = ({
 	onApiReady
 }: {
 	children: any;
-	onApiReady: TOnApiReady;
+	onApiReady?: TOnApiReady;
 }): JSX.Element => {
 	return (
 		<SlashtagsContextStore>

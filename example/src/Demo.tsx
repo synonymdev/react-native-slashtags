@@ -14,6 +14,7 @@ import {
   TSetProfileResult,
   TSlashUrlResult,
   TUrlParseResult,
+  TSdkState,
 } from '@synonymdev/react-native-slashtags';
 import JSONTree from 'react-native-json-tree';
 
@@ -25,7 +26,7 @@ const Demo = () => {
     useState<TSetProfileResult>(undefined);
   const [parseResult, setParseResult] = useState<TUrlParseResult>(undefined);
   const [authResult, setAuthResult] = useState<TSlashUrlResult>(undefined);
-  const [state, setState] = useState<any>(undefined);
+  const [sdkState, setSdkState] = useState<TSdkState>(undefined);
   const [url, setUrl] = useState('');
 
   const slashContext = useContext(SlashtagsContext);
@@ -127,8 +128,8 @@ const Demo = () => {
           <Button
             title={'State'}
             onPress={async () => {
-              const res = await slashRef.current.state({message: 'Hi from RN'});
-              setState(res);
+              const res = await slashRef.current.state();
+              setSdkState(res);
             }}
           />
         </View>
@@ -154,7 +155,7 @@ const Demo = () => {
           <JSONTree data={authResult} shouldExpandNode={() => true} />
         )}
         {/*// @ts-ignore*/}
-        {state && <JSONTree data={state} shouldExpandNode={() => true} />}
+        {sdkState && <JSONTree data={sdkState} shouldExpandNode={() => true} />}
       </ScrollView>
     </SafeAreaView>
   );

@@ -128,7 +128,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 const profile = await remote.getProfile();
                 if (!profile) {
                     return onError('No remote profile found');
-                };
+                }
 
                 switch (parsed.protocol) {
                     case 'slashauth':
@@ -154,16 +154,14 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
             }
             case 'state': {
                 let info = {
-                    receivedMessage: params.message,
-                    'global.indexedDB': '${global.indexedDB}',
-                    sdk: 'Not initialized',
-                    slashtags: 0,
+                    sdkSetup: false,
+                    profiles: 0,
                     relays: '',
                 };
 
                 if (sdk) {
-                    info.sdk = 'Initialized';
-                    info.slashtags = sdk.slashtags.size;
+                    info.sdkSetup = true;
+                    info.profiles = sdk.slashtags.size;
                     info.relays = sdk.opts.relays.toString();
                 }
 

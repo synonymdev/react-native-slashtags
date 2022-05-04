@@ -12,7 +12,8 @@ import {
 	TSetProfileResult,
 	TSetupParams,
 	TSlashUrlResult,
-	TUrlParseResult
+	TUrlParseResult,
+	TSdkState
 } from './index';
 
 const html = hexToString(webInterfaceHex);
@@ -32,7 +33,7 @@ type TWebMethod =
 	| 'slashUrl'
 	| 'state';
 
-export default forwardRef(({ onApiReady }: { onApiReady: TOnApiReady }, ref) => {
+export default forwardRef(({ onApiReady }: { onApiReady?: TOnApiReady }, ref) => {
 	const [webViewRef, setWebViewRef] = useState<WebView>();
 	const [msgIdNonce, setMsgIdNonce] = useState(0);
 	const [webReady, setWebReady] = useState(false);
@@ -120,8 +121,8 @@ export default forwardRef(({ onApiReady }: { onApiReady: TOnApiReady }, ref) => 
 		async slashUrl(url: string): Promise<TSlashUrlResult> {
 			return await callWebAction('slashUrl', url, 10000);
 		},
-		async state(message: string): Promise<any> {
-			return await callWebAction('state', { message }, 1000);
+		async state(): Promise<TSdkState> {
+			return await callWebAction('state', {}, 1000);
 		}
 	};
 
