@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import {
 	THexKeyPair,
 	TRnSlashtags,
+	TOnApiReady,
 	TSetProfileParams,
 	TSetProfileResult,
 	TSetupParams,
@@ -23,10 +24,6 @@ const webCallPromises: {
 	[key: string]: { resolve: TWebViewResolve; reject: TWebViewReject; time: Date };
 } = {};
 
-type TSlashtagsProps = {
-	onApiReady: () => void;
-};
-
 type TWebMethod =
 	| 'generateSeedKeyPair'
 	| 'setupSDK'
@@ -35,7 +32,7 @@ type TWebMethod =
 	| 'slashUrl'
 	| 'state';
 
-export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
+export default forwardRef(({ onApiReady }: { onApiReady: TOnApiReady }, ref) => {
 	const [webViewRef, setWebViewRef] = useState<WebView>();
 	const [msgIdNonce, setMsgIdNonce] = useState(0);
 	const [webReady, setWebReady] = useState(false);
@@ -95,7 +92,9 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 
 	const setServerStarted = (): void => {
 		setWebReady(true);
-		onApiReady();
+		if (onApiReady) {
+			onApiReady();
+		}
 	};
 
 	const rnSlashtags: TRnSlashtags = {
