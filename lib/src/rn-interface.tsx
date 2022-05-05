@@ -13,7 +13,8 @@ import {
 	TSetupParams,
 	TSlashUrlResult,
 	TUrlParseResult,
-	TSdkState
+	TSdkState,
+	TSlashUrlParams
 } from './index';
 
 const html = hexToString(webInterfaceHex);
@@ -28,7 +29,8 @@ const webCallPromises: {
 type TWebMethod =
 	| 'generateSeedKeyPair'
 	| 'setupSDK'
-	| 'setProfile'
+	| 'updateProfile'
+	| 'setCurrentProfile'
 	| 'parseUrl'
 	| 'slashUrl'
 	| 'state';
@@ -94,7 +96,7 @@ export default forwardRef(({ onApiReady }: { onApiReady?: TOnApiReady }, ref) =>
 	const setServerStarted = (): void => {
 		setWebReady(true);
 		if (onApiReady) {
-			onApiReady();
+			setTimeout(onApiReady, 100); // Requires slight delay if app uses this before state updates here
 		}
 	};
 
@@ -111,15 +113,15 @@ export default forwardRef(({ onApiReady }: { onApiReady?: TOnApiReady }, ref) =>
 			}
 			await callWebAction('setupSDK', params, 1000);
 		},
-		async setProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
+		async updateProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
 			validateSetProfile(params);
-			return await callWebAction('setProfile', params, 1000);
+			return await callWebAction('updateProfile', params, 1000);
 		},
 		async parseUrl(url: string): Promise<TUrlParseResult> {
 			return await callWebAction('parseUrl', url, 500);
 		},
-		async slashUrl(url: string): Promise<TSlashUrlResult> {
-			return await callWebAction('slashUrl', url, 10000);
+		async slashUrl(params: TSlashUrlParams): Promise<TSlashUrlResult> {
+			return await callWebAction('slashUrl', params, 10000);
 		},
 		async state(): Promise<TSdkState> {
 			return await callWebAction('state', {}, 1000);

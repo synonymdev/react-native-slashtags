@@ -35,6 +35,8 @@ const Demo = () => {
     setSlashRef(slashContext);
   }, [slashContext]);
 
+  const profileName = 'my-first-profile'; //Profile key must not change
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -99,8 +101,8 @@ const Demo = () => {
               }
 
               try {
-                const res = await slashRef.current.setProfile({
-                  name: 'my-first-profile',
+                const res = await slashRef.current.updateProfile({
+                  name: profileName,
                   basicProfile: {
                     name: 'ReactNativeSlashtagsExample',
                     type: 'Person',
@@ -117,7 +119,7 @@ const Demo = () => {
             title={'Auth'}
             onPress={async () => {
               try {
-                const res = await slashRef.current.slashUrl(url);
+                const res = await slashRef.current.slashUrl({url, profileName});
                 setAuthResult(res);
               } catch (e) {
                 setMessage(e.toString());

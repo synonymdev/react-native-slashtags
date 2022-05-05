@@ -17,6 +17,7 @@ export type TSetProfileResult = {
 	isNew: boolean;
 	slashtag: string;
 };
+export type TSlashUrlParams = { profileName: string; url: string };
 export type TSlashUrlResult = { loginSuccess: boolean; loginError?: Error };
 export type TSdkState = {
 	sdkSetup: boolean;
@@ -28,9 +29,9 @@ export type TOnApiReady = () => void;
 export type TRnSlashtags = {
 	generateSeedKeyPair: (seed: string) => Promise<THexKeyPair>;
 	setupSDK: (params: TSetupParams) => Promise<void>;
-	setProfile: (params: TSetProfileParams) => Promise<TSetProfileResult>;
+	updateProfile: (params: TSetProfileParams) => Promise<TSetProfileResult>;
 	parseUrl: (url: string) => Promise<TUrlParseResult>;
-	slashUrl: (url: string) => Promise<TSlashUrlResult>;
+	slashUrl: (params: TSlashUrlParams) => Promise<TSlashUrlResult>;
 	state: () => Promise<TSdkState>;
 };
 

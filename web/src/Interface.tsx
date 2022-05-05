@@ -17,7 +17,6 @@ declare global {
     var IDBMutableFile: any;
 }
 
-let currentProfile;
 let sdk;
 
 window.webAction = async (msgId: string, method: string, paramsString: string) => {
@@ -63,7 +62,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 break;
             }
-            case 'setProfile': {
+            case 'updateProfile': {
                 if (!sdk) {
                     return onError('Requires sdkSetup()');
                 }
@@ -84,13 +83,10 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                     await slashtag.setProfile(profile);
                 }
 
-                currentProfile = slashtag;
-
-                onResult({name, isNew: !existing, slashtag: currentProfile.url});
+                onResult({name, isNew: !existing, slashtag: slashtag.url});
 
                 break;
             }
-            //TODO split updateProfile with setProfile
             case 'parseUrl': {
                 const url = params;
 
@@ -110,12 +106,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                 if (!sdk) {
                     return onError('Requires sdkSetup()');
                 }
-
-                if (!currentProfile) {
-                    return onError('Requires setProfile()');
-                }
-
-                const url = params;
+                const { profileName, url } = params;
                 if (!url) {
                     onError(new Error("Missing url param"));
                     return;
@@ -123,6 +114,14 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 const parsed = SDK.parseURL(url);
 
+                //Profile we'll be using
+                const slashtag = await sdk.slashtag({ name: profileName });
+                const existing = await slashtag.getProfile();
+                if (!existing) {
+                    return onError(`No local profile found for ${profileName}`);
+                }
+
+                //Remote user/server
                 const remote = sdk.slashtag({ url });
                 await remote.ready();
 
@@ -133,7 +132,7 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
                 switch (parsed.protocol) {
                     case 'slashauth':
-                        const auth = currentProfile.protocols.get('slashauth:alpha')
+                        const auth = slashtag.protocols.get('slashauth:alpha')
 
                         auth.once('error', (error) => {
                             onResult({loginSuccess: false, loginError: error});
@@ -150,8 +149,6 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
                     default:
                         return;
                 }
-
-                break;
             }
             case 'state': {
                 let info = {
@@ -181,7 +178,9 @@ window.webAction = async (msgId: string, method: string, paramsString: string) =
 
 
 function RNInterface() {
-    const [slashAuthUrl, setSlashAuthUrl] = useState('')
+    const [slashAuthUrl, setSlashAuthUrl] = useState('slashauth://xbbtqitn5gnwqcvot2aikg46g5lj2fa3mcug2hd6ngjzaktnpt6q?q=ij2c7zf9gu');
+
+    const profileName = 'my-first-profile';
 
     return (
         <div className="App">
@@ -205,25 +204,25 @@ function RNInterface() {
             </button>
 
             <button onClick={() => {
-                window.webAction(Math.random(), 'setProfile', JSON.stringify({
-                    name: 'my-first-profile',
+                window.webAction(Math.random(), 'updateProfile', JSON.stringify({
+                    name: profileName,
                     basicProfile: {
                         name: 'RNInterfaceTest',
                         type: 'Person',
                     },
                 }));
             }}>
-                Set profile
+                Update profile
             </button>
 
             <button onClick={() => {
-                window.webAction(Math.random(), 'parseUrl', JSON.stringify({url: slashAuthUrl}));
+                window.webAction(Math.random(), 'parseUrl', JSON.stringify(slashAuthUrl));
             }}>
                 Parse URL
             </button>
 
             <button onClick={() => {
-                window.webAction(Math.random(), 'slashUrl', JSON.stringify({url: slashAuthUrl}));
+                window.webAction(Math.random(), 'slashUrl', JSON.stringify({profileName, url: slashAuthUrl}));
             }}>
                 Auth
             </button>
