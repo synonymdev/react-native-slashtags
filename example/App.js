@@ -12,7 +12,7 @@ import Demo from './src/Demo';
 
 const App = () => {
   return (
-    <SlashtagsProvider>
+    <SlashtagsProvider onApiReady={() => console.log('API ready')}>
       <Demo />
     </SlashtagsProvider>
   );

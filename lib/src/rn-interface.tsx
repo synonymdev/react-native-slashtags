@@ -7,11 +7,14 @@ import { View } from 'react-native';
 import {
 	THexKeyPair,
 	TRnSlashtags,
+	TOnApiReady,
 	TSetProfileParams,
 	TSetProfileResult,
 	TSetupParams,
 	TSlashUrlResult,
-	TUrlParseResult
+	TUrlParseResult,
+	TSdkState,
+	TSlashUrlParams
 } from './index';
 
 const html = hexToString(webInterfaceHex);
@@ -23,19 +26,16 @@ const webCallPromises: {
 	[key: string]: { resolve: TWebViewResolve; reject: TWebViewReject; time: Date };
 } = {};
 
-type TSlashtagsProps = {
-	onApiReady: () => void;
-};
-
 type TWebMethod =
 	| 'generateSeedKeyPair'
 	| 'setupSDK'
-	| 'setProfile'
+	| 'updateProfile'
+	| 'setCurrentProfile'
 	| 'parseUrl'
 	| 'slashUrl'
 	| 'state';
 
-export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
+export default forwardRef(({ onApiReady }: { onApiReady?: TOnApiReady }, ref) => {
 	const [webViewRef, setWebViewRef] = useState<WebView>();
 	const [msgIdNonce, setMsgIdNonce] = useState(0);
 	const [webReady, setWebReady] = useState(false);
@@ -95,7 +95,9 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 
 	const setServerStarted = (): void => {
 		setWebReady(true);
-		onApiReady();
+		if (onApiReady) {
+			setTimeout(onApiReady, 100); // Requires slight delay if app uses this before state updates here
+		}
 	};
 
 	const rnSlashtags: TRnSlashtags = {
@@ -111,18 +113,18 @@ export default forwardRef(({ onApiReady }: TSlashtagsProps, ref) => {
 			}
 			await callWebAction('setupSDK', params, 1000);
 		},
-		async setProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
+		async updateProfile(params: TSetProfileParams): Promise<TSetProfileResult> {
 			validateSetProfile(params);
-			return await callWebAction('setProfile', params, 1000);
+			return await callWebAction('updateProfile', params, 1000);
 		},
 		async parseUrl(url: string): Promise<TUrlParseResult> {
 			return await callWebAction('parseUrl', url, 500);
 		},
-		async slashUrl(url: string): Promise<TSlashUrlResult> {
-			return await callWebAction('slashUrl', url, 10000);
+		async slashUrl(params: TSlashUrlParams): Promise<TSlashUrlResult> {
+			return await callWebAction('slashUrl', params, 10000);
 		},
-		async state(message: string): Promise<any> {
-			return await callWebAction('state', { message }, 1000);
+		async state(): Promise<TSdkState> {
+			return await callWebAction('state', {}, 1000);
 		}
 	};
 

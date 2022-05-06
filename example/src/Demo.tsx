@@ -14,6 +14,7 @@ import {
   TSetProfileResult,
   TSlashUrlResult,
   TUrlParseResult,
+  TSdkState,
 } from '@synonymdev/react-native-slashtags';
 import JSONTree from 'react-native-json-tree';
 
@@ -25,7 +26,7 @@ const Demo = () => {
     useState<TSetProfileResult>(undefined);
   const [parseResult, setParseResult] = useState<TUrlParseResult>(undefined);
   const [authResult, setAuthResult] = useState<TSlashUrlResult>(undefined);
-  const [state, setState] = useState<any>(undefined);
+  const [sdkState, setSdkState] = useState<TSdkState>(undefined);
   const [url, setUrl] = useState('');
 
   const slashContext = useContext(SlashtagsContext);
@@ -33,6 +34,8 @@ const Demo = () => {
   useEffect(() => {
     setSlashRef(slashContext);
   }, [slashContext]);
+
+  const profileName = 'my-first-profile'; //Profile key must not change
 
   return (
     <SafeAreaView>
@@ -98,8 +101,8 @@ const Demo = () => {
               }
 
               try {
-                const res = await slashRef.current.setProfile({
-                  name: 'my-first-profile',
+                const res = await slashRef.current.updateProfile({
+                  name: profileName,
                   basicProfile: {
                     name: 'ReactNativeSlashtagsExample',
                     type: 'Person',
@@ -116,7 +119,7 @@ const Demo = () => {
             title={'Auth'}
             onPress={async () => {
               try {
-                const res = await slashRef.current.slashUrl(url);
+                const res = await slashRef.current.slashUrl({url, profileName});
                 setAuthResult(res);
               } catch (e) {
                 setMessage(e.toString());
@@ -127,8 +130,8 @@ const Demo = () => {
           <Button
             title={'State'}
             onPress={async () => {
-              const res = await slashRef.current.state({message: 'Hi from RN'});
-              setState(res);
+              const res = await slashRef.current.state();
+              setSdkState(res);
             }}
           />
         </View>
@@ -154,7 +157,7 @@ const Demo = () => {
           <JSONTree data={authResult} shouldExpandNode={() => true} />
         )}
         {/*// @ts-ignore*/}
-        {state && <JSONTree data={state} shouldExpandNode={() => true} />}
+        {sdkState && <JSONTree data={sdkState} shouldExpandNode={() => true} />}
       </ScrollView>
     </SafeAreaView>
   );
